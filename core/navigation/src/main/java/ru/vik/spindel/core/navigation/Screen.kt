@@ -4,28 +4,31 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.PropaneTank
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.serialization.Serializable
 
-sealed interface Screen {
-    object Brewing : Screen
-    object Devices : Screen
+// Публичные маршруты, доступные любому модулю
+sealed interface SharedRoutes {
 
-//    data class Brews(val list: List<String>) : Screen
-//    data class Chart(val list: List<String>) : Screen
+    // Вход в фичу пивоварения (только корень)
+    @Serializable
+    object BrewingRoot : SharedRoutes
+
+    @Serializable
+    object DeviceRoot : SharedRoutes
 }
 
 // Описание вкладок нижнего меню
 sealed class BottomTab(
-    val screen: Screen,
-    val route: String,
+    val route: Any,
     val title: String,
     val icon: ImageVector
 ) {
-    object BrewingTab : BottomTab(Screen.Brewing, "brew", "Варки", Icons.Filled.PropaneTank)
-    object DevicesTab : BottomTab(Screen.Devices, "device", "Устройства", Icons.Filled.Devices)
+    object BrewingTab : BottomTab(SharedRoutes.BrewingRoot, "Варки", Icons.Filled.PropaneTank)
+    object DevicesTab : BottomTab(SharedRoutes.DeviceRoot, "Устройства", Icons.Filled.Devices)
 }
 
 // Интерфейс для управления навигацией, который можно внедрять в ViewModel
 interface AppNavigator {
-    fun navigateTo(screen: Screen)
+    fun navigateTo(destination: SharedRoutes)
     fun navigateBack()
 }

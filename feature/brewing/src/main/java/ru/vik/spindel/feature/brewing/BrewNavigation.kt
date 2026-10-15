@@ -1,32 +1,63 @@
 package ru.vik.spindel.feature.brewing
 
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import androidx.navigation.navigation
+import androidx.navigation.toRoute
+import kotlinx.serialization.Serializable
+import ru.vik.spindel.core.navigation.SharedRoutes
+import ru.vik.spindel.feature.brewing.chart.BrewingChartScreen
+import ru.vik.spindel.feature.brewing.details.BrewDetailsScreen
+import ru.vik.spindel.feature.brewing.list.BrewListScreen
 
-/**
- * Навигационные роуты для feature:brews.
- *
- * Каждый роут — константа, которую используют другие модули
- * для навигации.
- */
-object BrewRoutes {
-    const val BREW_LIST = "brew_list"
-    const val BREW_DETAIL = "brew_detail/{brewId}"
-    const val BREW_EDIT = "brew_edit/{brewId}"
 
-//    val BREW_LIST_DEEP_LINK = ru.vik.spindel.core.navigation.NavRoute.DeepLink(
-//        uriPattern = "spindel://brews/list"
-//    )
+sealed interface BrewingRoutes {
+    @Serializable object List : BrewingRoutes
+
+    @Serializable data class Details(val batchId: Int) : BrewingRoutes
+
+    @Serializable data class Chart(val batchId: Int) : BrewingRoutes
 }
 
-/**
- * Extension для NavGraphBuilder — позволяет добавлять навигацию
- * из любого места графа.
- */
-fun NavGraphBuilder.brewListScreen(
-    onBrewClick: (Long) -> Unit
-) {
+///**
+// * Extension для NavGraphBuilder — позволяет добавлять навигацию
+// * из любого места графа.
+// */
+//fun NavGraphBuilder.brewListScreen(
+//    onBrewClick: (Long) -> Unit
+//) {
 //    composable(BrewRoutes.BREW_LIST) {
 //        BrewListScreen()
 //    }
+//}
+
+// Находится внутри модуля :features:brewing
+fun NavGraphBuilder.brewingGraph(navController: NavController) {
+    // navigation объединяет экраны в изолированную группу
+    navigation<SharedRoutes.BrewingRoot>(
+        startDestination = BrewingRoutes.List::class
+    ) {
+        composable<BrewingRoutes.List> {
+            BrewListScreen(onSubItemClick = { batchId ->
+                navController.navigate(BrewingRoutes.Details(batchId))
+            })
+        }
+
+        composable<BrewingRoutes.Details> { backStackEntry ->
+            val details = backStackEntry.toRoute<BrewingRoutes.Details>()
+            BrewDetailsScreen(
+                batchId = details.batchId,
+                onShowChart = {
+                    navController.navigate(BrewingRoutes.Chart(details.batchId))
+                }
+            )
+        }
+
+        composable<BrewingRoutes.Chart> { backStackEntry ->
+            val details = backStackEntry.toRoute<BrewingRoutes.Chart>()
+            BrewingChartScreen( batchId = details.batchId )
+        }
+
+    }
 }

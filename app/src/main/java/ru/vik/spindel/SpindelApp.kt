@@ -15,7 +15,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import ru.vik.spindel.core.navigation.BottomTab
-import ru.vik.spindel.feature.brewing.BrewListScreen
+import ru.vik.spindel.core.navigation.SharedRoutes
+import ru.vik.spindel.feature.brewing.brewingGraph
 import ru.vik.spindel.feature.devices.DeviceListScreen
 
 @Composable
@@ -64,15 +65,11 @@ fun SpindelApp(
         // Наш NavHost управляет переключением фич внутри области контента
         NavHost(
             navController = navController,
-            startDestination = BottomTab.BrewingTab.route,
+            startDestination = SharedRoutes.BrewingRoot,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(BottomTab.BrewingTab.route) {
-                BrewListScreen("brewing")
-            }
-            composable(BottomTab.DevicesTab.route) {
-                DeviceListScreen("devices")
-            }
+            brewingGraph(navController)
+            composable<SharedRoutes.DeviceRoot> { DeviceListScreen("devices") }
         }
     }
 }
