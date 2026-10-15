@@ -24,6 +24,7 @@ android {
 
 dependencies {
     implementation(project(":core:navigation"))
+    implementation(project(":core:metrics:api"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.appcompat)
