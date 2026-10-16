@@ -1,5 +1,6 @@
 package ru.vik.spindel.feature.brewing
 
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -15,9 +16,9 @@ import ru.vik.spindel.feature.brewing.list.BrewListScreen
 sealed interface BrewingRoutes {
     @Serializable object List : BrewingRoutes
 
-    @Serializable data class Details(val batchId: Int) : BrewingRoutes
+    @Serializable data class Details(val batchId: Long) : BrewingRoutes
 
-    @Serializable data class Chart(val batchId: Int) : BrewingRoutes
+    @Serializable data class Chart(val batchId: Long) : BrewingRoutes
 }
 
 ///**
@@ -40,16 +41,16 @@ fun NavGraphBuilder.brewingGraph(navController: NavController) {
     ) {
         composable<BrewingRoutes.List> {
             BrewListScreen(onSubItemClick = { batchId ->
-                navController.navigate(BrewingRoutes.Details(batchId))
+                navController.navigateSafe(BrewingRoutes.Details(batchId))
             })
         }
 
         composable<BrewingRoutes.Details> { backStackEntry ->
             val details = backStackEntry.toRoute<BrewingRoutes.Details>()
             BrewDetailsScreen(
-                batchId = details.batchId,
+                brewId = details.batchId,
                 onShowChart = {
-                    navController.navigate(BrewingRoutes.Chart(details.batchId))
+                    navController.navigateSafe(BrewingRoutes.Chart(details.batchId))
                 }
             )
         }
@@ -59,5 +60,13 @@ fun NavGraphBuilder.brewingGraph(navController: NavController) {
             BrewingChartScreen( batchId = details.batchId )
         }
 
+    }
+}
+
+fun NavController.navigateSafe(route: Any) {
+    // Проверяем, что текущий экран полностью активен (RESUMED)
+    // Если статус STARTED или другой — значит, мы уже куда-то переходим
+    if (currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+        navigate(route)
     }
 }

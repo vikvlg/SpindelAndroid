@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -37,6 +39,14 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:network:api"))
+    implementation(project(":core:network:fake"))
+
+    implementation(project(":core:brews:api"))
+    implementation(project(":core:brews:impl"))
+    implementation(project(":core:metrics:api"))
+    implementation(project(":core:metrics:impl"))
+
     implementation(project(":core:navigation"))
     implementation(project(":feature:brewing"))
     implementation(project(":feature:devices"))
@@ -51,8 +61,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
     testImplementation(libs.junit)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
+    //androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

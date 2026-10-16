@@ -5,7 +5,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun BrewingChartScreen(batchId: Int) {
+fun BrewingChartScreen(batchId: Long) {
     Column {
         Text(
             text = "Chart for batch $batchId"

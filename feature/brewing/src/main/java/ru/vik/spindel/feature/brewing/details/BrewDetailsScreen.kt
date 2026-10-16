@@ -4,12 +4,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import ru.vik.spindel.core.brews.api.Brew
 
 @Composable
-fun BrewDetailsScreen(batchId: Int, onShowChart: () -> Unit) {
+fun BrewDetailsScreen(brewId: Long, onShowChart: () -> Unit) {
     Column {
         Text(
-            text = "Details for batch $batchId"
+            text = "Варка: $brewId"
         )
         Button(
             onClick = onShowChart
@@ -20,3 +21,22 @@ fun BrewDetailsScreen(batchId: Int, onShowChart: () -> Unit) {
         }
     }
 }
+
+//@Composable
+//fun BrewDetailsScreen(brew: Brew, onShowChart: () -> Unit) {
+//    Column {
+//        Text(
+//            text = "Варка: ${brew.name}"
+//        )
+//        Text(
+//            text = "Дата: ${brew.date}"
+//        )
+//        Button(
+//            onClick = onShowChart
+//        ) {
+//            Text(
+//                text = "График"
+//            )
+//        }
+//    }
+//}
