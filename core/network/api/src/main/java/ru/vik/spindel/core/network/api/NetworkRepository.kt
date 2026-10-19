@@ -1,6 +1,7 @@
 package ru.vik.spindel.core.network.api
 
 import ru.vik.spindel.core.brews.api.Brew
+import ru.vik.spindel.core.devices.api.Device
 
 /**
  * Интерфейс репозитория по работе с сетью.
@@ -15,6 +16,6 @@ interface NetworkRepository {
 //    fun setMetricBrew(metricIds: List<Long>, brewId: Long?)
 //
 //    fun createDevice(): DeviceDto
-//    fun getDevice(deviceId: Long): DeviceDto
-//    fun getDeviceList(): List<DeviceDto>
+    fun getDevice(deviceId: Long): Result<Device>
+    fun getDeviceList(): Result<List<Device>>
 }

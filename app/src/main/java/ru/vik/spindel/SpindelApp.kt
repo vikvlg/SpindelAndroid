@@ -69,7 +69,11 @@ fun SpindelApp(
             modifier = Modifier.padding(innerPadding)
         ) {
             brewingGraph(navController)
-            composable<SharedRoutes.DeviceRoot> { DeviceListScreen("devices") }
+            composable<SharedRoutes.DeviceRoot> {
+                DeviceListScreen( onSubItemClick = {
+                    // TODO.
+                })
+            }
         }
     }
 }
