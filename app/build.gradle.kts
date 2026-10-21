@@ -39,6 +39,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:database:api"))
+    implementation(project(":core:database:fake"))
     implementation(project(":core:network:api"))
     implementation(project(":core:network:fake"))
 
