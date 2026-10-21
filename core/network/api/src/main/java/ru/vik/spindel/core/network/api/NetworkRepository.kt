@@ -9,7 +9,7 @@ import ru.vik.spindel.core.devices.api.Device
 interface NetworkRepository {
     //fun createBrew(): BrewDto
     fun getBrew(brewId: Long): Result<Brew>
-    fun getBrewList(): Result<List<Brew>>
+    suspend fun getBrewList(): Result<List<Brew>>
 
 //    fun getMetricList(brewId: Long?): List<MetricDto>
 //    fun setMetricBrew(metricId: Long, brewId: Long?)

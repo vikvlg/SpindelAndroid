@@ -21,6 +21,9 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:brews:api"))
+    implementation(project(":core:devices:api"))
+
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
     implementation(libs.material)

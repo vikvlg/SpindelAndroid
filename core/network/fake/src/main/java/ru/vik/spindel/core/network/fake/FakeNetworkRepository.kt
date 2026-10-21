@@ -1,27 +1,22 @@
 package ru.vik.spindel.core.network.fake
 
 import jakarta.inject.Inject
+import kotlinx.coroutines.delay
 import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.devices.api.Device
 import ru.vik.spindel.core.network.api.NetworkRepository
 import java.time.LocalDate
+import kotlin.time.Duration.Companion.milliseconds
 
 class FakeNetworkRepository @Inject constructor() : NetworkRepository {
     private var brewKey: Long = 0
     private var deviceKey: Long = 0
     private val brewList: List<Brew> = listOf(
-        Brew(++brewKey, "Рождественский грог", LocalDate.of(2026, 1, 7)),
-        Brew(++brewKey, "Стаут", LocalDate.of(2026, 1, 28)),
-        Brew(++brewKey, "Milkshake", LocalDate.of(2026, 2, 14)),
-        Brew(++brewKey, "Первомайская варка", LocalDate.of(2026, 5, 1)),
-        Brew(++brewKey, "Майская варка", LocalDate.of(2026, 5, 20)),
-        Brew(++brewKey, "Быстролагер", LocalDate.of(2026, 6, 3)),
         Brew(++brewKey, "Светлый эль", LocalDate.of(2026, 7, 1)),
         Brew(++brewKey, "IPA осенний", LocalDate.of(2026, 9, 18)),
         Brew(++brewKey, "Тыквенный эль", LocalDate.of(2026, 10, 1)),
     )
     private val deviceList: List<Device> = listOf(
-        Device(++deviceKey, "Первый"),
         Device(++deviceKey, "Второй"),
     )
 
@@ -33,7 +28,8 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
             Result.failure(Exception("Не найдено"))
     }
 
-    override fun getBrewList(): Result<List<Brew>> {
+    override suspend fun getBrewList(): Result<List<Brew>> {
+        delay(1500.milliseconds) // Имитация задержки сети
         return Result.success(brewList)
     }
 

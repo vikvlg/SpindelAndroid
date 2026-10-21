@@ -24,6 +24,7 @@ android {
 
 dependencies {
     implementation(project(":core:brews:api"))
+    implementation(project(":core:database:api"))
     implementation(project(":core:network:api"))
 
     implementation(libs.androidx.appcompat)
