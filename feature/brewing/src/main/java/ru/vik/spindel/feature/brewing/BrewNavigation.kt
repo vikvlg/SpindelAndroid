@@ -8,7 +8,7 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import kotlinx.serialization.Serializable
 import ru.vik.spindel.core.navigation.SharedRoutes
-import ru.vik.spindel.feature.brewing.chart.BrewingChartScreen
+import ru.vik.spindel.feature.brewing.chart.BrewChartScreen
 import ru.vik.spindel.feature.brewing.details.BrewDetailsScreen
 import ru.vik.spindel.feature.brewing.list.BrewListScreen
 
@@ -57,7 +57,7 @@ fun NavGraphBuilder.brewingGraph(navController: NavController) {
 
         composable<BrewingRoutes.Chart> { backStackEntry ->
             val details = backStackEntry.toRoute<BrewingRoutes.Chart>()
-            BrewingChartScreen( batchId = details.batchId )
+            BrewChartScreen( batchId = details.batchId )
         }
 
     }
