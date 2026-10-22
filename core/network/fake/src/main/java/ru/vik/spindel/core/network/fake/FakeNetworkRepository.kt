@@ -4,6 +4,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.devices.api.Device
+import ru.vik.spindel.core.metrics.api.Metric
 import ru.vik.spindel.core.network.api.NetworkRepository
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.milliseconds
@@ -31,6 +32,11 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
     override suspend fun getBrewList(): Result<List<Brew>> {
         delay(1500.milliseconds) // Имитация задержки сети
         return Result.success(brewList)
+    }
+
+    override suspend fun getMetricList(brewId: Long?): Result<List<Metric>> {
+        delay(1500.milliseconds) // Имитация задержки сети
+        return Result.success(emptyList())
     }
 
     override fun getDevice(deviceId: Long): Result<Device> {

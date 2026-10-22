@@ -25,6 +25,7 @@ android {
 dependencies {
     implementation(project(":core:brews:api"))
     implementation(project(":core:devices:api"))
+    implementation(project(":core:metrics:api"))
     implementation(project(":core:database:api"))
 
     implementation(libs.androidx.appcompat)

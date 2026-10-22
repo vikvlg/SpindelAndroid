@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -21,11 +23,16 @@ android {
 
 dependencies {
     implementation(project(":core:metrics:api"))
+    implementation(project(":core:database:api"))
     implementation(project(":core:network:api"))
 
 //    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.core.ktx)
 //    implementation(libs.material)
+    implementation(libs.jakarta.inject)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

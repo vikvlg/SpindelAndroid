@@ -1,5 +1,6 @@
 package ru.vik.spindel.core.database.fake
 
+import android.util.Log
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -12,12 +13,16 @@ import kotlinx.coroutines.sync.withLock
 import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.database.api.DatabaseRepository
 import ru.vik.spindel.core.devices.api.Device
+import ru.vik.spindel.core.metrics.api.Metric
 import java.time.LocalDate
+import java.time.LocalDateTime
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
 class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     private var brewKey: Long = 0
     private var deviceKey: Long = 0
+    private var metricKey: Long = 0
     private val brewList: MutableList<Brew> = mutableListOf(
         Brew(++brewKey, "Рождественский грог", LocalDate.of(2026, 1, 7)),
         Brew(++brewKey, "Стаут", LocalDate.of(2026, 1, 28)),
@@ -33,16 +38,10 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     private val mutex = Mutex()
     private val brewsState = MutableStateFlow<List<Brew>>(brewList)
     private val devicesState = MutableStateFlow<List<Device>>(deviceList)
+    private val metricsState: MutableMap<Long, MutableStateFlow<List<Metric>>> = mutableMapOf() //MutableStateFlow<List<Metric>>(brewList)
 
     override fun observeBrews(): Flow<List<Brew>> =
         brewsState
-            .asStateFlow()
-            .onStart {
-                delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
-            }
-
-    override fun observeDevices(): Flow<List<Device>> =
-        devicesState
             .asStateFlow()
             .onStart {
                 delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
@@ -64,6 +63,13 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
             }
         }
     }
+
+    override fun observeDevices(): Flow<List<Device>> =
+        devicesState
+            .asStateFlow()
+            .onStart {
+                delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+            }
 
     override suspend fun addDevice(device: Device) {
         mutex.withLock {
@@ -87,5 +93,50 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
                 currentList + updatedList
             }
         }
+    }
+
+    override fun observeMetrics(brewId: Long): Flow<List<Metric>> {
+        var state = metricsState[brewId]
+        if (state == null) {
+            state = MutableStateFlow(generateMetrics())
+            metricsState[brewId] = state
+        }
+
+        return state
+            .asStateFlow()
+            .onStart {
+                delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+            }
+    }
+
+    override suspend fun addMetrics(brewId: Long, list: List<Metric>) {
+        // TODO: .
+    }
+
+    private fun generateMetrics(): List<Metric> {
+        // Начальные и конечные параметры брожения
+        val startGravity = Random.nextDouble(10.0, 16.0)
+        val attenuation = Random.nextDouble(0.7, 0.9)
+        val endGravity = startGravity - startGravity * attenuation
+        val duration = Random.nextInt(7, 14)
+        val count = duration * 24
+
+        // Линейное изменение плотности
+        val deltaGravity = startGravity - endGravity
+        val stepGravity = deltaGravity / count
+        val list = mutableListOf<Metric>()
+        Log.d("TEST", "startGravity: $startGravity; endGravity: $endGravity; duration: $duration; stepGravity: $stepGravity")
+        val startTime = LocalDateTime.now()
+        for (i in 0..<count) {
+            val gravity = startGravity - i * stepGravity - Random.nextDouble(-0.1, 0.1)
+            val metric = Metric(
+                id = metricKey,
+                date = startTime.plusHours(i.toLong()),
+                gravity = gravity,
+                temperature = 15.0 + Random.nextDouble(-1.5, 1.5))
+            list.add(metric)
+        }
+
+        return list.toList()
     }
 }
