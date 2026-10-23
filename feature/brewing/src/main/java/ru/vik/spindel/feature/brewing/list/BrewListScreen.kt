@@ -78,11 +78,26 @@ fun BrewListScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(
-                        items = state.brewList,
-                        key = { brew -> brew.id }
-                    ) { brew ->
-                        BrewItemRow(brew, onChartClick, onDetailsClick)
+                    if (state.brewList.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier.fillParentMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Список варок пуст",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        }
+                    }
+                    else {
+                        items(
+                            items = state.brewList,
+                            key = { brew -> brew.id }
+                        ) { brew ->
+                            BrewItemRow(brew, onChartClick, onDetailsClick)
+                        }
                     }
                 }
             }
