@@ -7,18 +7,11 @@ import androidx.compose.runtime.Composable
 import ru.vik.spindel.core.brews.api.Brew
 
 @Composable
-fun BrewDetailsScreen(brewId: Long, onShowChart: () -> Unit) {
+fun BrewDetailsScreen(brewId: Long) {
     Column {
         Text(
             text = "Варка: $brewId"
         )
-        Button(
-            onClick = onShowChart
-        ) {
-            Text(
-                text = "График"
-            )
-        }
     }
 }
 

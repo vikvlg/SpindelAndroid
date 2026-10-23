@@ -40,18 +40,20 @@ fun NavGraphBuilder.brewingGraph(navController: NavController) {
         startDestination = BrewingRoutes.List::class
     ) {
         composable<BrewingRoutes.List> {
-            BrewListScreen(onSubItemClick = { batchId ->
-                navController.navigateSafe(BrewingRoutes.Details(batchId))
-            })
+            BrewListScreen(
+                onChartClick = { batchId ->
+                    navController.navigateSafe(BrewingRoutes.Chart(batchId))
+                },
+                onDetailsClick = { batchId ->
+                    navController.navigateSafe(BrewingRoutes.Details(batchId))
+                }
+            )
         }
 
         composable<BrewingRoutes.Details> { backStackEntry ->
             val details = backStackEntry.toRoute<BrewingRoutes.Details>()
             BrewDetailsScreen(
                 brewId = details.batchId,
-                onShowChart = {
-                    navController.navigateSafe(BrewingRoutes.Chart(details.batchId))
-                }
             )
         }
 
