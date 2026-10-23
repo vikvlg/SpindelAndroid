@@ -20,16 +20,19 @@ class BrewListViewModel @Inject constructor(
     private val repository: BrewRepository
 ) : ViewModel() {
 
-    /** Флаг первой загрузки данных, чтобы ограничить повторяющиеся индикаторы. **/
-    private var isFirstLoading = true
     /** Флаг-событие начала загрузки данных. **/
-    private val _isLoading = MutableStateFlow(false)
+    private val _isLoading = MutableStateFlow(true)
 
     /** Единое UI-состояние экрана списка варок. **/
-    val state: StateFlow<BrewListState> = repository.observeBrews()
-        .onStart { emit(emptyList()) }
+    val uiState: StateFlow<BrewListState> = repository.observeBrews()
+        .onStart {
+            emit(emptyList())
+            // Первичная загрузка данных
+            handleIntent(BrewListIntent.RefreshBrewList)
+        }
         .combine(_isLoading) { dbItems, loading ->
-            BrewListState(loading, dbItems)
+            // Уберем флаг isFirstLoading, если loading закончилась
+            BrewListState(uiState.value.isFirstLoading && loading, loading, dbItems)
         }
         .stateIn(
             scope = viewModelScope,
@@ -44,22 +47,18 @@ class BrewListViewModel @Inject constructor(
     /** Обработчик действий пользователя. **/
     fun handleIntent(intent: BrewListIntent) {
         when (intent) {
-            is BrewListIntent.RefreshClicked -> loadBrewList()
+            is BrewListIntent.RefreshBrewList -> loadBrewList()
         }
     }
 
     /** Подгружает список варок. **/
     private fun loadBrewList() {
         viewModelScope.launch {
-            _isLoading.value = isFirstLoading
-            isFirstLoading = false
+            _isLoading.value = true
 
             repository.refreshBrews()
-                .onSuccess {
-                    _isLoading.value = false
-                }
+                .also { _isLoading.value = false }
                 .onFailure { error ->
-                    _isLoading.value = false
                     _effect.emit(BrewListEffect.ShowError("Не удалось обновить данные: ${error.message}"))
                 }
         }

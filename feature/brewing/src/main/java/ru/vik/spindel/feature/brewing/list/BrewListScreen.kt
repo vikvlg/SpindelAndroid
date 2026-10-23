@@ -16,10 +16,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +45,7 @@ fun BrewListScreen(
     onDetailsClick: (batchId: Long) -> Unit,
     viewModel: BrewListViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     // Сообщение об ошибке
@@ -55,48 +56,44 @@ fun BrewListScreen(
             }
         }
     }
-    // Первичная загрузка данных
-    LaunchedEffect(Unit) {
-        viewModel.handleIntent(BrewListIntent.RefreshClicked)
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (state.brewList.isEmpty() && state.isLoading) {
-            // Если данных вообще нет и идет подгрузка, то покажем только значок подгрузки
+        if (state.brewList.isEmpty() && state.isFirstLoading) {
+            // Если данных вообще нет и идет первая подгрузка, то покажем только значок подгрузки
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         } else {
-            Column {
-                // Если какие-то данные появились, но идет подгрузка из сети,
-                // то сверху экрана отобразим полоску загрузки.
-                if (state.isLoading) {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-
-                // Список варок
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (state.brewList.isEmpty()) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillParentMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Список варок пуст",
-                                    style = MaterialTheme.typography.titleMedium
-                                )
+            PullToRefreshBox(
+                isRefreshing = state.isLoading,
+                onRefresh = { viewModel.handleIntent(BrewListIntent.RefreshBrewList) },
+                state = rememberPullToRefreshState(),
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Column {
+                    // Список варок
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        if (state.brewList.isEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillParentMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Список варок пуст",
+                                        style = MaterialTheme.typography.titleMedium
+                                    )
+                                }
                             }
-                        }
-                    }
-                    else {
-                        items(
-                            items = state.brewList,
-                            key = { brew -> brew.id }
-                        ) { brew ->
-                            BrewItemRow(brew, onChartClick, onDetailsClick)
+                        } else {
+                            items(
+                                items = state.brewList,
+                                key = { brew -> brew.id }
+                            ) { brew ->
+                                BrewItemRow(brew, onChartClick, onDetailsClick)
+                            }
                         }
                     }
                 }
