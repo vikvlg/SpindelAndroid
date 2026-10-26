@@ -8,6 +8,7 @@ import ru.vik.spindel.core.metrics.api.Metric
 interface DatabaseRepository {
     fun observeBrews(): Flow<List<Brew>>
     suspend fun addBrews(list: List<Brew>)
+    suspend fun getBrew(brewId: Long): Brew?
 
     fun observeDevices(): Flow<List<Device>>
 

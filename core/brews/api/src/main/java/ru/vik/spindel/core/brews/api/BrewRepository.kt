@@ -6,4 +6,5 @@ interface BrewRepository {
     fun observeBrews(): Flow<List<Brew>>
     //fun refreshBrew(brewId: Long): Result<Brew>
     suspend fun refreshBrews(): Result<Unit>
+    suspend fun getBrew(brewId: Long): Result<Brew>
 }

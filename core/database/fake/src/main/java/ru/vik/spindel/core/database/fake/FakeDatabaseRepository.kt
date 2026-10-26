@@ -64,6 +64,13 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
         }
     }
 
+    override suspend fun getBrew(brewId: Long): Brew? {
+        mutex.withLock {
+            delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+            return brewsState.value.find { brew -> brew.id == brewId }
+        }
+    }
+
     override fun observeDevices(): Flow<List<Device>> =
         devicesState
             .asStateFlow()

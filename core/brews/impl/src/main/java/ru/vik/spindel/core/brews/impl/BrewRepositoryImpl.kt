@@ -1,6 +1,7 @@
 package ru.vik.spindel.core.brews.impl
 
 import jakarta.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.brews.api.BrewRepository
@@ -16,6 +17,17 @@ class BrewRepositoryImpl @Inject constructor(
     override suspend fun refreshBrews(): Result<Unit> {
         return network.getBrewList().mapCatching { list ->
             database.addBrews(list)
+        }
+    }
+
+    override suspend fun getBrew(brewId: Long): Result<Brew> {
+        try {
+            val brew = database.getBrew(brewId) ?: return Result.failure(Exception("Not found"))
+            return Result.success(brew)
+        } catch (ex: CancellationException) {
+            throw ex
+        } catch (ex: Exception) {
+            return Result.failure(ex)
         }
     }
 }
