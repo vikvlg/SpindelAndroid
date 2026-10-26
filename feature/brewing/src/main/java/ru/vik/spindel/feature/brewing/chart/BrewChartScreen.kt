@@ -29,7 +29,6 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun BrewChartScreen(
-    batchId: Long,
     viewModel: BrewChartViewModel = hiltViewModel()
 ) {
     val metricsState by viewModel.metrics.collectAsStateWithLifecycle()
@@ -78,7 +77,7 @@ fun BrewChartScreen(
             modifier = Modifier.fillMaxSize(),
             placeholder = {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Loading chart for batch $batchId...")
+                    Text("Loading chart for batch ${viewModel.brewId}...")
                 }
             }
         )
