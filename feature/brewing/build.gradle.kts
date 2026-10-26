@@ -25,6 +25,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
     implementation(project(":core:metrics:api"))
     implementation(project(":core:brews:api"))
@@ -38,6 +39,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose)
     implementation(libs.androidx.navigation.common.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.material)
     implementation(libs.jakarta.inject)
     implementation(libs.hilt.navigation.compose)
@@ -45,6 +47,7 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)

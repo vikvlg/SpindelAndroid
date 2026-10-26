@@ -39,6 +39,7 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:designsystem"))
     implementation(project(":core:database:api"))
     implementation(project(":core:database:fake"))
     implementation(project(":core:network:api"))

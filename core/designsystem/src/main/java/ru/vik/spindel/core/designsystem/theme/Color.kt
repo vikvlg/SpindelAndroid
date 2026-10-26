@@ -1,4 +1,4 @@
-package ru.vik.spindel.ui.theme
+package ru.vik.spindel.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
