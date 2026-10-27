@@ -32,11 +32,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.vik.spindel.core.brews.api.Brew
+import ru.vik.spindel.feature.brewing.R
 
 /** Экран со списком варок. */
 @Composable
@@ -49,10 +51,12 @@ fun BrewListScreen(
     val context = LocalContext.current
 
     // Сообщение об ошибке
+    val errorPrefixMessage = stringResource(R.string.brewing_list_error_prefix)
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is BrewListEffect.ShowError -> Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                is BrewListEffect.ShowError ->
+                    Toast.makeText(context, errorPrefixMessage + effect.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -82,7 +86,7 @@ fun BrewListScreen(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Text(
-                                        text = "Список варок пуст",
+                                        text = stringResource(R.string.brewing_list_empty),
                                         style = MaterialTheme.typography.titleMedium
                                     )
                                 }
@@ -156,11 +160,11 @@ fun BrewItemRow(
                 onDismissRequest = { showMenu = false },
             ) {
                 DropdownMenuItem(
-                    text = { Text("График") },
+                    text = { Text(stringResource(R.string.brewing_list_menu_chart)) },
                     onClick = { onMenuAction { onChartClick(brew.id) } }
                 )
                 DropdownMenuItem(
-                    text = { Text("Информация") },
+                    text = { Text(stringResource(R.string.brewing_list_menu_details)) },
                     onClick = { onMenuAction { onDetailsClick(brew.id) } }
                 )
             }

@@ -22,6 +22,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    resourcePrefix = "brewing_"
 }
 
 dependencies {
@@ -39,6 +40,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.compose)
     implementation(libs.androidx.navigation.common.ktx)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.material)
     implementation(libs.jakarta.inject)

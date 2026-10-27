@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "ru.vik.spindel.feature.chart"
+    namespace = "ru.vik.spindel.feature.devices"
     compileSdk {
         version = release(37)
     }
@@ -21,6 +21,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    resourcePrefix = "devices_"
 }
 
 dependencies {

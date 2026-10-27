@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brewing_list_empty">Список варок пуст</string>
+    <string name="brewing_list_menu_chart">График</string>
+    <string name="brewing_list_menu_details">Информация</string>
+    <string name="brewing_list_error_prefix">Не удалось обновить данные: </string>
+
+    <string name="brewing_details_brew_not_found">Варка не найдена</string>
+    <string name="brewing_details_brew_name">Варка</string>
+    <string name="brewing_details_brew_date_time">Время</string>
+    <string name="brewing_details_brew_data_empty">Нет расширенных данных по варке</string>
+    <string name="brewing_details_on_chart">К графику</string>
+
+    <string name="brewing_chart_axis_x_empty">-</string>
+    <string name="brewing_chart_loading">Загрузка данных</string>
+</resources>

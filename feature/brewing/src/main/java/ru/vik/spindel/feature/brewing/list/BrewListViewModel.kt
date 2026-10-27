@@ -59,7 +59,7 @@ class BrewListViewModel @Inject constructor(
             repository.refreshBrews()
                 .also { _isLoading.value = false }
                 .onFailure { error ->
-                    _effect.emit(BrewListEffect.ShowError("Не удалось обновить данные: ${error.message}"))
+                    _effect.emit(BrewListEffect.ShowError(error.message))
                 }
         }
     }

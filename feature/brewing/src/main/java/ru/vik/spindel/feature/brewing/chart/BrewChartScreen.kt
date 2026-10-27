@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -23,9 +24,9 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLa
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
+import ru.vik.spindel.core.designsystem.toUiString
+import ru.vik.spindel.feature.brewing.R
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-
 
 @Composable
 fun BrewChartScreen(
@@ -35,15 +36,16 @@ fun BrewChartScreen(
     val modelProducer = remember { CartesianChartModelProducer() }
 
     // Форматирование подписи X-оси
+    // TODO: Проверить скорость работы, могут быть замедления из-за постоянных получений даты.
     val labelListKey = ExtraStore.Key<List<LocalDateTime>>() // Ключ для хранения списка дат внутри модели графика
-    val formatter = DateTimeFormatter.ofPattern("dd.MM HH:mm")
+    val emptyValue = stringResource(R.string.brewing_chart_axis_x_empty)
     val bottomAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
         val dates = context.model.extraStore[labelListKey]
         val index = x.toInt()
         if (index in dates.indices) {
-            dates[index].format(formatter)
+            dates[index].toUiString()
         } else {
-            "-"
+            emptyValue
         }
     }
 
@@ -77,7 +79,7 @@ fun BrewChartScreen(
             modifier = Modifier.fillMaxSize(),
             placeholder = {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Loading chart for batch ${viewModel.brewId}...")
+                    Text(stringResource(R.string.brewing_chart_loading))
                 }
             }
         )
