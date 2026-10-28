@@ -9,4 +9,6 @@ internal object BrewPreviewData {
         name = "Пшеничное нефильтрованное",
         date = LocalDate.of(2026, 9, 1)
     )
+
+    val brewList = listOf(brew)
 }

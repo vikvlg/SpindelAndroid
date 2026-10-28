@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 import ru.vik.spindel.core.navigation.SharedRoutes
 import ru.vik.spindel.feature.brewing.chart.BrewChartScreen
 import ru.vik.spindel.feature.brewing.details.BrewDetailsRoute
-import ru.vik.spindel.feature.brewing.list.BrewListScreen
+import ru.vik.spindel.feature.brewing.list.BrewListRoute
 
 
 sealed interface BrewingRoutes {
@@ -39,7 +39,7 @@ fun NavGraphBuilder.brewingGraph(navController: NavController) {
         startDestination = BrewingRoutes.List::class
     ) {
         composable<BrewingRoutes.List> {
-            BrewListScreen(
+            BrewListRoute(
                 onChartClick = { batchId ->
                     navController.navigateSafe(BrewingRoutes.Chart(batchId))
                 },

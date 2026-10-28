@@ -38,11 +38,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.vik.spindel.core.brews.api.Brew
+import ru.vik.spindel.core.designsystem.PreviewContainer
+import ru.vik.spindel.core.designsystem.ScreenPreviews
+import ru.vik.spindel.feature.brewing.BrewPreviewData
 import ru.vik.spindel.feature.brewing.R
 
-/** Экран со списком варок. */
 @Composable
-fun BrewListScreen(
+fun BrewListRoute(
     onChartClick: (batchId: Long) -> Unit,
     onDetailsClick: (batchId: Long) -> Unit,
     viewModel: BrewListViewModel = hiltViewModel()
@@ -61,6 +63,23 @@ fun BrewListScreen(
         }
     }
 
+    BrewListScreen(
+        state = state,
+        onIntent = viewModel::handleIntent,
+        onChartClick = onChartClick,
+        onDetailsClick = onDetailsClick
+    )
+}
+
+
+/** Экран со списком варок. */
+@Composable
+fun BrewListScreen(
+    state: BrewListState,
+    onIntent: (intent: BrewListIntent) -> Unit,
+    onChartClick: (batchId: Long) -> Unit,
+    onDetailsClick: (batchId: Long) -> Unit,
+) {
     Box(modifier = Modifier.fillMaxSize()) {
         if (state.brewList.isEmpty() && state.isFirstLoading) {
             // Если данных вообще нет и идет первая подгрузка, то покажем только значок подгрузки
@@ -68,7 +87,7 @@ fun BrewListScreen(
         } else {
             PullToRefreshBox(
                 isRefreshing = state.isLoading,
-                onRefresh = { viewModel.handleIntent(BrewListIntent.RefreshBrewList) },
+                onRefresh = { onIntent(BrewListIntent.RefreshBrewList) },
                 state = rememberPullToRefreshState(),
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -169,5 +188,44 @@ fun BrewItemRow(
                 )
             }
         }
+    }
+}
+
+@ScreenPreviews
+@Composable
+private fun BrewListFirstLoadingPreview() {
+    PreviewContainer {
+        BrewListScreen(
+            state = BrewListState(isFirstLoading = true, isLoading = true, brewList = emptyList()),
+            onIntent = {},
+            onChartClick = {},
+            onDetailsClick = {},
+        )
+    }
+}
+
+@ScreenPreviews
+@Composable
+private fun BrewListAnotherLoadingPreview() {
+    PreviewContainer {
+        BrewListScreen(
+            state = BrewListState(isFirstLoading = false, isLoading = true, brewList = BrewPreviewData.brewList),
+            onIntent = {},
+            onChartClick = {},
+            onDetailsClick = {},
+        )
+    }
+}
+
+@ScreenPreviews
+@Composable
+private fun BrewListContentPreview() {
+    PreviewContainer {
+        BrewListScreen(
+            state = BrewListState(isFirstLoading = false, isLoading = false, brewList = BrewPreviewData.brewList),
+            onIntent = {},
+            onChartClick = {},
+            onDetailsClick = {},
+        )
     }
 }
