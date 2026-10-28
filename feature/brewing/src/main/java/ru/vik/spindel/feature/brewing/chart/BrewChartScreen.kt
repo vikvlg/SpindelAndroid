@@ -103,7 +103,7 @@ fun BrewChartScreen(
                 getXStep = { _, _, _ -> 1.0 }, // шаг оси X — одни сутки
             ),
             modelProducer = modelProducer,
-            zoomState = rememberVicoZoomState(zoomEnabled = false, initialZoom = Zoom.Content),
+            zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
             modifier = Modifier.fillMaxSize(),
             placeholder = {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

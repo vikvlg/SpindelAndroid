@@ -126,12 +126,16 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
         val startGravity = Random.nextDouble(10.0, 16.0)
         val attenuation = Random.nextDouble(70.0, 90.0)
         val duration = Random.nextInt(10, 21)
+        val startTemperature = Random.nextDouble(22.0, 30.0)
+        val targetTemperature = Random.nextDouble(10.0, 18.0)
 
-        return MetricsGenerator().generateFermentationMetrics(
+        return generateFermentationMetrics(
             startTime,
             startGravity,
             attenuation,
-            duration)
+            duration,
+            startTemperature,
+            targetTemperature)
 
 
 //        // Линейное изменение плотности
