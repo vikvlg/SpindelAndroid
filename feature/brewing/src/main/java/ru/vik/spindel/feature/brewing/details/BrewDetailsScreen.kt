@@ -19,11 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import ru.vik.spindel.core.designsystem.theme.SpindelTheme
+import ru.vik.spindel.core.designsystem.PreviewContainer
+import ru.vik.spindel.core.designsystem.ScreenPreviews
 import ru.vik.spindel.feature.brewing.BrewPreviewData
 import ru.vik.spindel.feature.brewing.R
 
@@ -105,10 +105,11 @@ fun KeyValueRow(key: String, value: String) {
         )
     }
 }
-@Preview(showBackground = true)
+
+@ScreenPreviews
 @Composable
 private fun BrewDetailsLoadingPreview() {
-    SpindelTheme {
+    PreviewContainer {
         BrewDetailsScreen(
             state = BrewDetailsState(isLoading = true),
             onChartClick = {},
@@ -117,10 +118,10 @@ private fun BrewDetailsLoadingPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@ScreenPreviews
 @Composable
 private fun BrewDetailsContentPreview() {
-    SpindelTheme {
+    PreviewContainer {
         BrewDetailsScreen(
             state = BrewDetailsState(isLoading = false, brew = BrewPreviewData.brew),
             onChartClick = {},
