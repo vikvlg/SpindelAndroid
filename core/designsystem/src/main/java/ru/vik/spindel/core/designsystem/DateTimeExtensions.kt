@@ -2,6 +2,7 @@ package ru.vik.spindel.core.designsystem
 
 import android.content.res.Resources
 import androidx.core.os.ConfigurationCompat
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -21,6 +22,15 @@ fun LocalDateTime.toUiString(): String {
     // Форматтер создается/извлекается с актуальной локалью в момент вызова
     val formatter = DateTimeFormatter
         .ofPattern("dd.MM HH:mm")
+        .withLocale(getCurrentLocale())
+
+    return this.format(formatter)
+}
+
+fun LocalDate.toUiString(): String {
+    // Форматтер создается/извлекается с актуальной локалью в момент вызова
+    val formatter = DateTimeFormatter
+        .ofPattern("dd.MM")
         .withLocale(getCurrentLocale())
 
     return this.format(formatter)
