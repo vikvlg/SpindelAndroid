@@ -15,4 +15,5 @@
     <string name="brewing_chart_loading">Загрузка данных</string>
     <string name="brewing_chart_axis_gravity_unit">" °P"</string>
     <string name="brewing_chart_axis_temperature_unit">" °C"</string>
+    <string name="brewing_chart_marker_not_found">n/a</string>
 </resources>

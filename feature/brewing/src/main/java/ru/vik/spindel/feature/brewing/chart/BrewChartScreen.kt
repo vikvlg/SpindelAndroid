@@ -19,6 +19,9 @@ import com.patrykandpatrick.vico.compose.cartesian.Zoom
 import com.patrykandpatrick.vico.compose.cartesian.axis.Axis
 import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLabelComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisLineComponent
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisTickComponent
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
@@ -26,9 +29,12 @@ import com.patrykandpatrick.vico.compose.cartesian.data.lineModel
 import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import ru.vik.spindel.core.designsystem.toUiString
 import ru.vik.spindel.feature.brewing.R
 
@@ -41,9 +47,11 @@ fun BrewChartScreen(
     viewModel: BrewChartViewModel = hiltViewModel()
 ) {
     val metricsState by viewModel.metrics.collectAsStateWithLifecycle()
+    val metricsByX = remember(metricsState) { metricsState.associateBy { it.date.toChartX() } }
     val modelProducer = remember { CartesianChartModelProducer() }
     val axisGravityUnit = stringResource(R.string.brewing_chart_axis_gravity_unit)
     val axisTemperatureUnit = stringResource(R.string.brewing_chart_axis_temperature_unit)
+    val markerNotFoundText = stringResource(R.string.brewing_chart_marker_not_found)
 
     LaunchedEffect(metricsState) {
         if (metricsState.isEmpty()) return@LaunchedEffect
@@ -86,21 +94,55 @@ fun BrewChartScreen(
         CartesianValueFormatter.decimal(decimalCount = 0, suffix = axisTemperatureUnit)
     }
 
+    // Цвета подписей осей-Y (12.sp — размер Vico по умолчанию)
+    val temperatureAxisLabel = rememberAxisLabelComponent(
+        style = MaterialTheme.typography.labelMedium.copy(color = temperatureColor),
+    )
+    val gravityAxisLabel = rememberAxisLabelComponent(
+        style = MaterialTheme.typography.labelMedium.copy(color = gravityColor),
+    )
+
+    // Маркер отображения информации выбранной точки
+    val markerValueFormatter = remember(metricsByX) {
+        DefaultCartesianMarker.ValueFormatter { _, targets ->
+            val metric = metricsByX[targets.first().x] ?: return@ValueFormatter markerNotFoundText
+            "${metric.gravity}${axisGravityUnit} · ${metric.temperature}${axisTemperatureUnit}"
+        }
+    }
+    val marker = rememberDefaultCartesianMarker(
+        label = rememberTextComponent(),
+        valueFormatter = markerValueFormatter,
+        labelPosition = DefaultCartesianMarker.LabelPosition.AroundPoint
+    )
+
     Column {
+        // Цвета линий и засечек оси-Y (можно увеличить thickness до 2.dp).
+        val temperatureAxisLine = rememberAxisLineComponent(fill = Fill(temperatureColor))
+        val temperatureAxisTick = rememberAxisTickComponent(fill = Fill(temperatureColor))
+        val gravityAxisLine = rememberAxisLineComponent(fill = Fill(gravityColor))
+        val gravityAxisTick = rememberAxisTickComponent(fill = Fill(gravityColor))
+
         CartesianChartHost(
             chart = rememberCartesianChart(
                 gravityLayer, temperatureLayer,
                 startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = temperatureAxisValueFormatter,
-                    guideline = null, // сетку рисует только шкала плотности
+                    label = gravityAxisLabel,
+                    line = gravityAxisLine,
+                    tick = gravityAxisTick,
+                    valueFormatter = gravityAxisValueFormatter,
                 ),
                 endAxis = VerticalAxis.rememberEnd(
-                    valueFormatter = gravityAxisValueFormatter,
+                    label = temperatureAxisLabel,
+                    line = temperatureAxisLine,
+                    tick = temperatureAxisTick,
+                    valueFormatter = temperatureAxisValueFormatter,
+                    guideline = null, // сетку рисует только шкала плотности
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     valueFormatter = bottomAxisValueFormatter,
                 ),
                 getXStep = { _, _, _ -> 1.0 }, // шаг оси X — одни сутки
+                marker = marker
             ),
             modelProducer = modelProducer,
             zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.Content),
