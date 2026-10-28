@@ -1,6 +1,5 @@
 package ru.vik.spindel.core.database.fake
 
-import android.util.Log
 import jakarta.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -14,7 +13,6 @@ import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.database.api.DatabaseRepository
 import ru.vik.spindel.core.devices.api.Device
 import ru.vik.spindel.core.metrics.api.Metric
-import java.time.LocalDate
 import java.time.LocalDateTime
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
@@ -24,12 +22,12 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     private var deviceKey: Long = 0
     private var metricKey: Long = 0
     private val brewList: MutableList<Brew> = mutableListOf(
-        Brew(++brewKey, "Рождественский грог", LocalDate.of(2026, 1, 7)),
-        Brew(++brewKey, "Стаут", LocalDate.of(2026, 1, 28)),
-        Brew(++brewKey, "Milkshake", LocalDate.of(2026, 2, 14)),
-        Brew(++brewKey, "Первомайская варка", LocalDate.of(2026, 5, 1)),
-        Brew(++brewKey, "Майская варка", LocalDate.of(2026, 5, 20)),
-        Brew(++brewKey, "Быстролагер", LocalDate.of(2026, 6, 3)),
+        Brew(++brewKey, "Рождественский грог", LocalDateTime.of(2026, 1, 7, 12, 0, 0)),
+        Brew(++brewKey, "Стаут", LocalDateTime.of(2026, 1, 28, 12, 0, 0)),
+        Brew(++brewKey, "Milkshake", LocalDateTime.of(2026, 2, 14, 12, 0, 0)),
+        Brew(++brewKey, "Первомайская варка", LocalDateTime.of(2026, 5, 1, 12, 0, 0)),
+        Brew(++brewKey, "Майская варка", LocalDateTime.of(2026, 5, 20, 12, 0, 0)),
+        Brew(++brewKey, "Быстролагер", LocalDateTime.of(2026, 6, 3, 12, 0, 0)),
     )
     private val deviceList: List<Device> = listOf(
         Device(++deviceKey, "Первый"),
@@ -105,7 +103,10 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     override fun observeMetrics(brewId: Long): Flow<List<Metric>> {
         var state = metricsState[brewId]
         if (state == null) {
-            state = MutableStateFlow(generateMetrics())
+            // BUG: Тут в теории может быть ошибка из-за прямого обращения к brewsState.value без Mutex.
+            val brew = brewsState.value.find { brew -> brew.id == brewId }
+            val startBrewTime = brew?.date ?: LocalDateTime.now()
+            state = MutableStateFlow(generateMetrics(startBrewTime))
             metricsState[brewId] = state
         }
 
@@ -120,30 +121,35 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
         // TODO: .
     }
 
-    private fun generateMetrics(): List<Metric> {
-        // Начальные и конечные параметры брожения
+    private fun generateMetrics(startTime: LocalDateTime = LocalDateTime.now()): List<Metric> {
+        // Параметры брожения
         val startGravity = Random.nextDouble(10.0, 16.0)
-        val attenuation = Random.nextDouble(0.7, 0.9)
-        val endGravity = startGravity - startGravity * attenuation
-        val duration = Random.nextInt(7, 14)
-        val count = duration * 24
+        val attenuation = Random.nextDouble(70.0, 90.0)
+        val duration = Random.nextInt(10, 21)
 
-        // Линейное изменение плотности
-        val deltaGravity = startGravity - endGravity
-        val stepGravity = deltaGravity / count
-        val list = mutableListOf<Metric>()
-        Log.d("TEST", "startGravity: $startGravity; endGravity: $endGravity; duration: $duration; stepGravity: $stepGravity")
-        val startTime = LocalDateTime.now()
-        for (i in 0..<count) {
-            val gravity = startGravity - i * stepGravity - Random.nextDouble(-0.1, 0.1)
-            val metric = Metric(
-                id = metricKey,
-                date = startTime.plusHours(i.toLong()),
-                gravity = gravity,
-                temperature = 15.0 + Random.nextDouble(-1.5, 1.5))
-            list.add(metric)
-        }
+        return MetricsGenerator().generateFermentationMetrics(
+            startTime,
+            startGravity,
+            attenuation,
+            duration)
 
-        return list.toList()
+
+//        // Линейное изменение плотности
+//        val endGravity = startGravity - startGravity * attenuation
+//        val count = duration * 24
+//        val deltaGravity = startGravity - endGravity
+//        val stepGravity = deltaGravity / count
+//        val list = mutableListOf<Metric>()
+//        for (i in 0..<count) {
+//            val gravity = startGravity - i * stepGravity - Random.nextDouble(-0.1, 0.1)
+//            val metric = Metric(
+//                id = metricKey,
+//                date = startTime.plusHours(i.toLong()),
+//                gravity = gravity,
+//                temperature = 15.0 + Random.nextDouble(-1.5, 1.5))
+//            list.add(metric)
+//        }
+//
+//        return list.toList()
     }
 }

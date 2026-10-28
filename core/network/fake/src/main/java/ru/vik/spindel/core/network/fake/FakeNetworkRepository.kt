@@ -6,16 +6,16 @@ import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.devices.api.Device
 import ru.vik.spindel.core.metrics.api.Metric
 import ru.vik.spindel.core.network.api.NetworkRepository
-import java.time.LocalDate
+import java.time.LocalDateTime
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 
 class FakeNetworkRepository @Inject constructor() : NetworkRepository {
     private var brewKey: Long = 0
     private var deviceKey: Long = 0
-    private val brewList: List<Brew> = listOf(
-        Brew(++brewKey, "Светлый эль", LocalDate.of(2026, 7, 1)),
-        Brew(++brewKey, "IPA осенний", LocalDate.of(2026, 9, 18)),
-        Brew(++brewKey, "Тыквенный эль", LocalDate.of(2026, 10, 1)),
+    // Счетчик запросов списка варки, чтобы можно было возвращаться данные не при запуске программы, а чуть позже
+    private var brewListRefreshCounter: Long = 0
+    private val brewList: MutableList<Brew> = mutableListOf(
     )
     private val deviceList: List<Device> = listOf(
         Device(++deviceKey, "Второй"),
@@ -31,6 +31,21 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
 
     override suspend fun getBrewList(): Result<List<Brew>> {
         delay(1500.milliseconds) // Имитация задержки сети
+
+        // Случайная ошибка
+        if (Random.nextInt(10) == 0)
+            return Result.failure(Exception("Some random error"))
+
+        // Имитация ошибка сети, чтобы загрузка данных проходила не с первого раза.
+        if (brewListRefreshCounter++ == 0L) {
+            brewList.addAll(
+                listOf(
+                    Brew(++brewKey, "Светлый эль", LocalDateTime.of(2026, 7, 1, 14, 0, 0)),
+                    Brew(++brewKey, "IPA осенний", LocalDateTime.of(2026, 9, 18, 14, 0, 0)),
+                    Brew(++brewKey, "Тыквенный эль", LocalDateTime.of(2026, 10, 1, 14, 0, 0)),
+                )
+            )
+        }
         return Result.success(brewList)
     }
 
