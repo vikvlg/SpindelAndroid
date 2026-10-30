@@ -46,20 +46,20 @@ private val TemperatureRangeProvider = WholeDaysRangeProvider(PaddedYRange(paddi
 fun BrewChartScreen(
     viewModel: BrewChartViewModel = hiltViewModel()
 ) {
-    val metricsState by viewModel.metrics.collectAsStateWithLifecycle()
-    val metricsByX = remember(metricsState) { metricsState.associateBy { it.date.toChartX() } }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val metricsByX = remember(uiState.metrics) { uiState.metrics.associateBy { it.date.toChartX() } }
     val modelProducer = remember { CartesianChartModelProducer() }
     val axisGravityUnit = stringResource(R.string.brewing_chart_axis_gravity_unit)
     val axisTemperatureUnit = stringResource(R.string.brewing_chart_axis_temperature_unit)
     val markerNotFoundText = stringResource(R.string.brewing_chart_marker_not_found)
 
-    LaunchedEffect(metricsState) {
-        if (metricsState.isEmpty()) return@LaunchedEffect
-        val x = metricsState.map { it.date.toChartX() }
+    LaunchedEffect(uiState.metrics) {
+        if (uiState.metrics.isEmpty()) return@LaunchedEffect
+        val x = uiState.metrics.map { it.date.toChartX() }
         modelProducer.runTransaction {
             // Порядок важен: первая модель достаётся первому линейному слою, вторая — второму
-            lineModel { series(x = x, y = metricsState.map { it.gravity }) }
-            lineModel { series(x = x, y = metricsState.map { it.temperature }) }
+            lineModel { series(x = x, y = uiState.metrics.map { it.gravity }) }
+            lineModel { series(x = x, y = uiState.metrics.map { it.temperature }) }
         }
     }
 
