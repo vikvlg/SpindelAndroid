@@ -55,6 +55,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":feature:brewing"))
     implementation(project(":feature:devices"))
+    implementation(project(":feature:rawdata"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

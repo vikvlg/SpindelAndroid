@@ -1,6 +1,7 @@
 package ru.vik.spindel.core.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DataArray
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.PropaneTank
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -15,6 +16,9 @@ sealed interface SharedRoutes {
 
     @Serializable
     object DeviceRoot : SharedRoutes
+
+    @Serializable
+    object RawDataRoot : SharedRoutes
 }
 
 // Описание вкладок нижнего меню
@@ -25,6 +29,8 @@ sealed class BottomTab(
 ) {
     object BrewingTab : BottomTab(SharedRoutes.BrewingRoot, "Варки", Icons.Filled.PropaneTank)
     object DevicesTab : BottomTab(SharedRoutes.DeviceRoot, "Устройства", Icons.Filled.Devices)
+
+    object RawDataTab : BottomTab(SharedRoutes.RawDataRoot, "Метрики", Icons.Filled.DataArray)
 }
 
 // Интерфейс для управления навигацией, который можно внедрять в ViewModel

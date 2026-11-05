@@ -18,6 +18,7 @@ import ru.vik.spindel.core.navigation.BottomTab
 import ru.vik.spindel.core.navigation.SharedRoutes
 import ru.vik.spindel.feature.brewing.brewingGraph
 import ru.vik.spindel.feature.devices.DeviceListScreen
+import ru.vik.spindel.feature.rawdata.RawDataRoute
 
 @Composable
 fun SpindelApp(
@@ -29,6 +30,7 @@ fun SpindelApp(
     val tabs = listOf(
         BottomTab.BrewingTab,
         BottomTab.DevicesTab,
+        BottomTab.RawDataTab,
     )
 
     Scaffold(
@@ -73,6 +75,9 @@ fun SpindelApp(
                 DeviceListScreen( onSubItemClick = {
                     // TODO.
                 })
+            }
+            composable<SharedRoutes.RawDataRoot> {
+                RawDataRoute()
             }
         }
     }
