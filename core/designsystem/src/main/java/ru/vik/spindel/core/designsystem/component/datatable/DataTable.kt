@@ -1,7 +1,6 @@
 package ru.vik.spindel.core.designsystem.component.datatable
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -32,6 +31,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import ru.vik.spindel.core.designsystem.component.datatable.internal.DataTableSpec
+import ru.vik.spindel.core.designsystem.component.datatable.internal.ResolvedColumn
 
 @Composable
 fun <T> DataTable(
@@ -54,6 +55,7 @@ fun <T> DataTable(
     val overscroll = rememberOverscrollEffect()
 
     // Расчет ширины закрепленных столбцов
+    // TODO: Расчет ширины экрана и возможность растянуть Flexed столбцы.
     var pinnedWidth = Dp(0f)
     columns.forEachPinnedColumn(fixedColumnCount) { column ->
         when (column.width) {
@@ -61,7 +63,23 @@ fun <T> DataTable(
             is DataTableColumn.Width.Flexed -> throw Exception("Fixed columns require a fixed width. Column '${column.title}' has a flex width.")
         }
     }
-    // TODO: Расчет ширины экрана и возможность растянуть Flexed столбцы.
+
+    val spec = DataTableSpec(
+        pinnedColumns = columns.filterPinnedColumn(fixedColumnCount).map { ResolvedColumn(it, it.calcWidth()) },
+        scrollableColumns = columns.filterUnpinnedColumn(fixedColumnCount).map { ResolvedColumn(it, it.calcWidth()) },
+        fixedRowHeader = fixedRowHeader,
+        //pinnedWidth = pinnedWidth,
+        headerHeight = headerHeight,
+        rowHeight = rowHeight,
+        cellPadding = cellPadding,
+        gridLines = gridLines,
+        gridLineThickness = gridLineThickness,
+        colors = colors,
+        headerTextStyle = headerTextStyle,
+        cellTextStyle = cellTextStyle,
+        scrollState = scrollState,
+        overscroll = overscroll
+    )
 
     Column(
         modifier = Modifier
@@ -75,195 +93,145 @@ fun <T> DataTable(
                 endShadowColor = colors.endShadow,
             )
     ) {
-        if (fixedRowHeader) {
-            // Фиксированный заголовок
-            TableHeader(
-                scrollState = scrollState,
-                overscroll = overscroll,
-                columns = columns,
-                fixedColumnCount = fixedColumnCount,
-                headerHeight = headerHeight,
-                textStyle = headerTextStyle,
-                cellPadding = cellPadding,
-                colors = colors,
-            )
-        }
+        spec.FixedHeader()
 
-        // Тело таблицы
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if (!fixedRowHeader) {
-                // Плавающий заголовок
-                item {
-                    TableHeader(
-                        scrollState = scrollState,
-                        overscroll = overscroll,
-                        columns = columns,
-                        fixedColumnCount = fixedColumnCount,
-                        headerHeight = headerHeight,
-                        textStyle = headerTextStyle,
-                        cellPadding = cellPadding,
-                        colors = colors,
-                    )
-                }
+        LazyColumn {
+            item {
+                spec.FlexedHeader()
             }
 
-            // Строки таблицы
             items(items = items, key = key) { item ->
-                Row(modifier = Modifier
-                    .height(rowHeight)
-                ) {
-                    // Закрепленные столбцы, если они есть
-                    columns.forEachPinnedColumn(fixedColumnCount) { column ->
-                        TableColumn(
-                            item = item,
-                            column = column,
-                            isFixed = true,
-                            rowHeight = rowHeight,
-                            textStyle = cellTextStyle,
-                            gridLineThickness = gridLineThickness,
-                            cellPadding = cellPadding,
-                            gridLines = gridLines,
-                            colors = colors,
-                        )
-                    }
-                    // Обычные столбцы
-                    val rowOverscroll = remember(overscroll) { overscroll?.withoutVisualEffect() }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .rowGridLine(gridLines, colors.divider, gridLineThickness)
-                            // Отключим эффект овер-скролла, т.к. он работает только для одной строки и плохо выглядит
-                            .horizontalScroll(state = scrollState, overscrollEffect = rowOverscroll)
-                    ) {
-                        columns.forEachUnpinnedColumn(fixedColumnCount) { column ->
-                            TableColumn(
-                                item = item,
-                                column = column,
-                                isFixed = false,
-                                rowHeight = rowHeight,
-                                textStyle = cellTextStyle,
-                                gridLineThickness = gridLineThickness,
-                                cellPadding = cellPadding,
-                                gridLines = gridLines,
-                                colors = colors,
-                            )
-                        }
-                    }
-                }
-            } // items
+                spec.Row(item)
+            }
         }
     }
 }
 
+/** Фиксированный заголовок таблицы. **/
 @Composable
-fun <T> TableHeader(
-    scrollState: ScrollState,
-    overscroll: OverscrollEffect?,
-    columns: List<DataTableColumn<T>>,
-    fixedColumnCount: Int,
-    headerHeight: Dp,
-    textStyle: TextStyle,
-    cellPadding: PaddingValues,
-    colors: DataTableColors
-) {
+private fun <T> DataTableSpec<T>.FixedHeader() {
+    if (fixedRowHeader) {
+        Header()
+    }
+}
+
+/** Плавающий заголовок таблицы. **/
+@Composable
+private fun <T> DataTableSpec<T>.FlexedHeader() {
+    if (!fixedRowHeader) {
+        Header()
+    }
+}
+
+/** Заголовок таблицы. **/
+@Composable
+private fun <T> DataTableSpec<T>.Header() {
     Row(
         modifier = Modifier
             .height(headerHeight)
             .background(colors.headerBackground)
     ) {
         // Ячейки фиксированных столбцов
-        columns.forEachPinnedColumn(fixedColumnCount) { column ->
-            TableHeaderCell(
-                column = column,
-                rowHeight = headerHeight,
-                textStyle = textStyle,
-                cellPadding = cellPadding,
-                colors = colors,
-            )
+        pinnedColumns.forEach { column ->
+            HeaderCell(column)
         }
-        // Ячейки нефиксированных столбцов
+        // Ячейки плавающих столбцов
         val rowOverscroll = remember(overscroll) { overscroll?.withoutVisualEffect() }
         Row(modifier = Modifier
             .fillMaxWidth()
-            // Отключим эффект овер-скролла, т.к. он работает только для одной строки и плохо выглядит
+            .rowGridLine(gridLines, colors.divider, gridLineThickness)
+            // Переведем овер-скролл строки на всю таблицу.
             .horizontalScroll(state = scrollState, overscrollEffect = rowOverscroll)
         ) {
-            columns.forEachUnpinnedColumn(fixedColumnCount) { column ->
-                TableHeaderCell(
+            scrollableColumns.forEach { column ->
+                HeaderCell(column)
+            }
+        }
+    }
+}
+
+/** Ячейка заголовка таблицы. **/
+@Composable
+private fun <T> DataTableSpec<T>.HeaderCell(
+    column: ResolvedColumn<T>,
+) {
+    Text(
+        modifier = Modifier
+            .height(headerHeight)
+            .width(column.width)
+            .padding(cellPadding),
+        text = column.column.title,
+        textAlign = column.column.titleAlign,
+        color = colors.headerContent,
+        style = headerTextStyle,
+    )
+}
+
+/** Строка таблицы. **/
+@Composable
+private fun <T> DataTableSpec<T>.Row(
+    row: T,
+) {
+    Row(modifier = Modifier
+        .height(rowHeight)
+        .background(colors.rowBackground)
+    ) {
+        // Закрепленные столбцы, если они есть
+        pinnedColumns.forEach { column ->
+            Cell(
+                item = row,
+                column = column,
+                isFixed = true,
+            )
+        }
+
+        // Плавающие столбцы
+        val rowOverscroll = remember(overscroll) { overscroll?.withoutVisualEffect() }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .rowGridLine(gridLines, colors.divider, gridLineThickness)
+                // Переведем овер-скролл строки на всю таблицу.
+                .horizontalScroll(state = scrollState, overscrollEffect = rowOverscroll)
+        ) {
+            scrollableColumns.forEach { column ->
+                Cell(
+                    item = row,
                     column = column,
-                    rowHeight = headerHeight,
-                    textStyle = textStyle,
-                    cellPadding = cellPadding,
-                    colors = colors,
+                    isFixed = false,
                 )
             }
         }
     }
 }
 
+/** Ячейка тела таблицы. **/
 @Composable
-fun <T> TableHeaderCell(
-    column: DataTableColumn<T>,
-    rowHeight: Dp,
-    textStyle: TextStyle,
-    cellPadding: PaddingValues,
-    colors: DataTableColors,
-) {
-    val width = when (column.width) {
-        is DataTableColumn.Width.Fixed -> column.width.fixedWidth
-        is DataTableColumn.Width.Flexed -> column.width.minWidth
-    }
-
-    Text(
-        modifier = Modifier
-            .height(rowHeight)
-            .width(width)
-            .padding(cellPadding),
-        text = column.title,
-        textAlign = column.titleAlign,
-        color = colors.headerContent,
-        style = textStyle,
-    )
-}
-
-@Composable
-fun <T> TableColumn(
+private fun <T> DataTableSpec<T>.Cell(
     item: T,
-    column: DataTableColumn<T>,
+    column: ResolvedColumn<T>,
     isFixed: Boolean,
-    rowHeight: Dp,
-    textStyle: TextStyle,
-    gridLineThickness: Dp,
-    cellPadding: PaddingValues,
-    gridLines: DataTableGridLines,
-    colors: DataTableColors,
 ) {
-    val columnWidth = when (column.width) {
-        is DataTableColumn.Width.Fixed -> column.width.fixedWidth
-        is DataTableColumn.Width.Flexed -> column.width.minWidth
-    }
     val background = if (isFixed) colors.pinnedBackground else colors.rowBackground
     val color = if (isFixed) colors.pinnedCellContent else colors.unpinnedCellContent
 
     Text(
         modifier = Modifier
             .height(rowHeight)
-            .width(columnWidth)
+            .width(column.width)
             .background(background)
             .cellGridLine(gridLines, colors.divider, gridLineThickness)
             // WARNING: padding обязательно должен быть после cellGridLine, чтобы не ломать отрисовку сетки.
             .padding(cellPadding),
-        text = column.text(item),
-        textAlign = column.textAlign,
-        style = textStyle,
+        text = column.column.text(item),
+        textAlign = column.column.textAlign,
+        style = cellTextStyle,
         color = color,
     )
 }
 
 /** Рисует нижнюю линию всей строки. **/
-internal fun Modifier.rowGridLine(
+private fun Modifier.rowGridLine(
     gridLines: DataTableGridLines,
     color: Color,
     thickness: Dp,
@@ -277,7 +245,7 @@ internal fun Modifier.rowGridLine(
     }
 
 /** Рисует правую линию ячейки. **/
-internal fun Modifier.cellGridLine(
+private fun Modifier.cellGridLine(
     gridLines: DataTableGridLines,
     color: Color,
     thickness: Dp,
@@ -292,7 +260,7 @@ internal fun Modifier.cellGridLine(
 
 /** Рисует тени для горизонтального скролла. **/
 @Composable
-internal fun Modifier.horizontalScrollShadows(
+private fun Modifier.horizontalScrollShadows(
     state: ScrollState,
     pinnedWidth: Dp,
     startShadowColor: Color,
@@ -342,7 +310,7 @@ private inline fun <T> List<DataTableColumn<T>>.forEachPinnedColumn(
     }
 }
 
-/** Проходит все незакрепленные столбцы таблицы. **/
+/** Проходит все плавающие столбцы таблицы. **/
 private inline fun <T> List<DataTableColumn<T>>.forEachUnpinnedColumn(
     fixedColumnCount: Int,
     block: (DataTableColumn<T>) -> Unit
@@ -350,5 +318,22 @@ private inline fun <T> List<DataTableColumn<T>>.forEachUnpinnedColumn(
     forEachIndexed { index, column ->
         if (index >= fixedColumnCount)
             block(column)
+    }
+}
+
+/** Возвращает список закрепленных столбцов. **/
+private fun <T> List<DataTableColumn<T>>.filterPinnedColumn(
+    fixedColumnCount: Int
+): List<DataTableColumn<T>> = filterIndexed { index, _ -> index < fixedColumnCount }
+
+/** Возвращает список плавающих столбцов. **/
+private fun <T> List<DataTableColumn<T>>.filterUnpinnedColumn(
+    fixedColumnCount: Int
+): List<DataTableColumn<T>> = filterIndexed { index, _ -> index >= fixedColumnCount }
+
+private fun <T> DataTableColumn<T>.calcWidth(): Dp {
+    return when (width) {
+        is DataTableColumn.Width.Fixed -> width.fixedWidth
+        is DataTableColumn.Width.Flexed -> width.minWidth
     }
 }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 
+/** Данные столбца таблицы. **/
 @Immutable
 data class DataTableColumn<T>(
     /** Заголовок столбца. **/
