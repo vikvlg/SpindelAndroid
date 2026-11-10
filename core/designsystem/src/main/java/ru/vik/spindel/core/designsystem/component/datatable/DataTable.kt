@@ -83,6 +83,7 @@ fun <T> DataTable(
                 columns = columns,
                 fixedColumnCount = fixedColumnCount,
                 headerHeight = headerHeight,
+                textStyle = headerTextStyle,
                 cellPadding = cellPadding,
                 colors = colors,
             )
@@ -101,6 +102,7 @@ fun <T> DataTable(
                         columns = columns,
                         fixedColumnCount = fixedColumnCount,
                         headerHeight = headerHeight,
+                        textStyle = headerTextStyle,
                         cellPadding = cellPadding,
                         colors = colors,
                     )
@@ -119,6 +121,7 @@ fun <T> DataTable(
                             column = column,
                             isFixed = true,
                             rowHeight = rowHeight,
+                            textStyle = cellTextStyle,
                             gridLineThickness = gridLineThickness,
                             cellPadding = cellPadding,
                             gridLines = gridLines,
@@ -140,6 +143,7 @@ fun <T> DataTable(
                                 column = column,
                                 isFixed = false,
                                 rowHeight = rowHeight,
+                                textStyle = cellTextStyle,
                                 gridLineThickness = gridLineThickness,
                                 cellPadding = cellPadding,
                                 gridLines = gridLines,
@@ -160,6 +164,7 @@ fun <T> TableHeader(
     columns: List<DataTableColumn<T>>,
     fixedColumnCount: Int,
     headerHeight: Dp,
+    textStyle: TextStyle,
     cellPadding: PaddingValues,
     colors: DataTableColors
 ) {
@@ -173,6 +178,7 @@ fun <T> TableHeader(
             TableHeaderCell(
                 column = column,
                 rowHeight = headerHeight,
+                textStyle = textStyle,
                 cellPadding = cellPadding,
                 colors = colors,
             )
@@ -188,6 +194,7 @@ fun <T> TableHeader(
                 TableHeaderCell(
                     column = column,
                     rowHeight = headerHeight,
+                    textStyle = textStyle,
                     cellPadding = cellPadding,
                     colors = colors,
                 )
@@ -200,6 +207,7 @@ fun <T> TableHeader(
 fun <T> TableHeaderCell(
     column: DataTableColumn<T>,
     rowHeight: Dp,
+    textStyle: TextStyle,
     cellPadding: PaddingValues,
     colors: DataTableColors,
 ) {
@@ -215,7 +223,8 @@ fun <T> TableHeaderCell(
             .padding(cellPadding),
         text = column.title,
         textAlign = column.titleAlign,
-        color = colors.headerContent
+        color = colors.headerContent,
+        style = textStyle,
     )
 }
 
@@ -225,6 +234,7 @@ fun <T> TableColumn(
     column: DataTableColumn<T>,
     isFixed: Boolean,
     rowHeight: Dp,
+    textStyle: TextStyle,
     gridLineThickness: Dp,
     cellPadding: PaddingValues,
     gridLines: DataTableGridLines,
@@ -247,7 +257,8 @@ fun <T> TableColumn(
             .padding(cellPadding),
         text = column.text(item),
         textAlign = column.textAlign,
-        color = color
+        style = textStyle,
+        color = color,
     )
 }
 
