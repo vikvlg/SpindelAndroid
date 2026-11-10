@@ -19,8 +19,8 @@ enum class DataTableGridLines(
 
 object DataTableDefaults {
     // Размеры от темы не зависят, поэтому это обычные константы
-    val HeaderHeight = 32.dp
-    val RowHeight = 24.dp
+    val HeaderHeight = 48.dp
+    val RowHeight = 48.dp
     val CellPadding = PaddingValues(horizontal = 8.dp)
     val GridLines = DataTableGridLines.All
     val GridLineThickness = 1.dp
