@@ -17,8 +17,9 @@ enum class DataTableGridLines(
     All(horizontal = true, vertical = true),
 }
 
+typealias GestureCallback<T> = ((T) -> Unit)?
+
 object DataTableDefaults {
-    // Размеры от темы не зависят, поэтому это обычные константы
     val HeaderHeight = 48.dp
     val RowHeight = 48.dp
     val CellPadding = PaddingValues(horizontal = 8.dp)

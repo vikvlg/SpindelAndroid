@@ -8,6 +8,7 @@ import ru.vik.spindel.core.designsystem.component.datatable.DataTableColors
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableGridLines
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableState
+import ru.vik.spindel.core.designsystem.component.datatable.GestureCallback
 
 /** UI-параметры таблицы. **/
 @Immutable
@@ -15,6 +16,8 @@ internal data class DataTableSpec<T>(
     val pinnedColumns: List<ResolvedColumn<T>>,
     val scrollableColumns: List<ResolvedColumn<T>>,
     val fixedRowHeader: Boolean,
+    val onRowClick: GestureCallback<T>,
+    val onRowLongClick: GestureCallback<T>,
     //val pinnedWidth: Dp,
     val headerHeight: Dp,
     val rowHeight: Dp,

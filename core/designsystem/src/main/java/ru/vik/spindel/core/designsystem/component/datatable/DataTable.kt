@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
@@ -43,6 +44,8 @@ fun <T> DataTable(
     columns: List<DataTableColumn<T>>,
     fixedColumnCount: Int = 1,
     fixedRowHeader: Boolean = true,
+    onRowClick: GestureCallback<T> = null,
+    onRowLongClick: GestureCallback<T> = null,
     tableState: DataTableState = rememberDataTableState(),
     colors: DataTableColors = DataTableDefaults.colors(),
     headerHeight: Dp = DataTableDefaults.HeaderHeight,
@@ -81,6 +84,8 @@ fun <T> DataTable(
         pinnedColumns = columns.filterPinnedColumn(fixedColumnCount).map { ResolvedColumn(it, it.calcWidth()) },
         scrollableColumns = columns.filterUnpinnedColumn(fixedColumnCount).map { ResolvedColumn(it, it.calcWidth()) },
         fixedRowHeader = fixedRowHeader,
+        onRowClick = onRowClick,
+        onRowLongClick = onRowLongClick,
         //pinnedWidth = pinnedWidth,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
@@ -193,9 +198,20 @@ private fun <T> DataTableSpec<T>.HeaderCell(
 private fun <T> DataTableSpec<T>.Row(
     row: T,
 ) {
+    val clickModifier =
+        if (onRowClick != null || onRowLongClick != null) {
+            Modifier.combinedClickable(
+                onClick = { onRowClick?.invoke(row) },
+                onLongClick = onRowLongClick?.let { { it(row) } },
+            )
+        } else {
+            Modifier
+        }
+
     Row(modifier = Modifier
         .height(rowHeight)
         .background(colors.rowBackground)
+        .then(clickModifier)
     ) {
         // Закрепленные столбцы, если они есть
         pinnedColumns.forEach { column ->
