@@ -3,6 +3,7 @@ package ru.vik.spindel.core.designsystem.component.datatable
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -27,6 +28,8 @@ object DataTableDefaults {
     val GridLineThickness = 1.dp
     val ScrollbarThickness = 4.dp
     val ScrollbarMinThumbLength = 24.dp
+    val headerVerticalAlign = Alignment.CenterVertically
+    val cellVerticalAlign = Alignment.CenterVertically
 
     // Внутренние размеры наружу не выставляем
     internal val StartShadowWidth = 8.dp
@@ -38,6 +41,7 @@ object DataTableDefaults {
 
     val cellTextStyle: TextStyle
         @Composable get() = MaterialTheme.typography.bodyMedium
+
 
     const val SHADOW_ALPHA = 0.2f
     const val SCROLLBAR_ALPHA = 0.5f

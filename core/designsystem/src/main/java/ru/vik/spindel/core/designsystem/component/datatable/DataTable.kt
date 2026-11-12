@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.overscroll
@@ -24,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
@@ -55,6 +57,8 @@ fun <T> DataTable(
     gridLineThickness: Dp = DataTableDefaults.GridLineThickness,
     headerTextStyle: TextStyle = DataTableDefaults.headerTextStyle,
     cellTextStyle: TextStyle = DataTableDefaults.cellTextStyle,
+    headerVerticalAlign: Alignment.Vertical = DataTableDefaults.headerVerticalAlign,
+    cellVerticalAlign: Alignment.Vertical = DataTableDefaults.cellVerticalAlign,
 ) {
     // Расчет ширины закрепленных столбцов
     // TODO: Расчет ширины экрана и возможность растянуть Flexed столбцы.
@@ -95,6 +99,8 @@ fun <T> DataTable(
         colors = colors,
         headerTextStyle = headerTextStyle,
         cellTextStyle = cellTextStyle,
+        headerVerticalAlign = headerVerticalAlign,
+        cellVerticalAlign = cellVerticalAlign,
         tableState = tableState,
     )
 
@@ -185,7 +191,8 @@ private fun <T> DataTableSpec<T>.HeaderCell(
         modifier = Modifier
             .height(headerHeight)
             .width(column.width)
-            .padding(cellPadding),
+            .padding(cellPadding)
+            .wrapContentHeight(headerVerticalAlign),
         text = column.column.title,
         textAlign = column.column.titleAlign,
         color = colors.headerContent,
@@ -258,7 +265,8 @@ private fun <T> DataTableSpec<T>.Cell(
             .background(background)
             .cellGridLine(gridLines, colors.divider, gridLineThickness)
             // WARNING: padding обязательно должен быть после cellGridLine, чтобы не ломать отрисовку сетки.
-            .padding(cellPadding),
+            .padding(cellPadding)
+            .wrapContentHeight(cellVerticalAlign),
         text = column.column.text(item),
         textAlign = column.column.textAlign,
         style = cellTextStyle,

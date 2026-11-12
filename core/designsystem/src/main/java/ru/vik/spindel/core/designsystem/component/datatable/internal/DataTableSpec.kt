@@ -2,6 +2,7 @@ package ru.vik.spindel.core.designsystem.component.datatable.internal
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColors
@@ -27,6 +28,8 @@ internal data class DataTableSpec<T>(
     val colors: DataTableColors,
     val headerTextStyle: TextStyle,
     val cellTextStyle: TextStyle,
+    val headerVerticalAlign: Alignment.Vertical,
+    val cellVerticalAlign: Alignment.Vertical,
     val tableState: DataTableState,
 )
 
