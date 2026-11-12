@@ -43,6 +43,7 @@ import kotlin.math.max
 fun <T> DataTable(
     items: List<T>,
     key: (T) -> Any,
+    selectedKeys: Set<Any> = emptySet(),
     columns: List<DataTableColumn<T>>,
     fixedColumnCount: Int = 1,
     fixedRowHeader: Boolean = true,
@@ -134,7 +135,7 @@ fun <T> DataTable(
             }
 
             items(items = items, key = key) { item ->
-                spec.Row(item)
+                spec.Row(item, selectedKeys.contains(key(item)))
             }
         }
     }
@@ -204,6 +205,7 @@ private fun <T> DataTableSpec<T>.HeaderCell(
 @Composable
 private fun <T> DataTableSpec<T>.Row(
     row: T,
+    isSelected: Boolean,
 ) {
     val clickModifier =
         if (onRowClick != null || onRowLongClick != null) {
@@ -217,7 +219,7 @@ private fun <T> DataTableSpec<T>.Row(
 
     Row(modifier = Modifier
         .height(rowHeight)
-        .background(colors.rowBackground)
+        .background(if (isSelected) colors.selectedRowBackground else colors.rowBackground)
         .then(clickModifier)
     ) {
         // Закрепленные столбцы, если они есть
@@ -255,7 +257,7 @@ private fun <T> DataTableSpec<T>.Cell(
     column: ResolvedColumn<T>,
     isFixed: Boolean,
 ) {
-    val background = if (isFixed) colors.pinnedBackground else colors.rowBackground
+    val background = if (isFixed) colors.pinnedBackground else Color.Unspecified
     val color = if (isFixed) colors.pinnedCellContent else colors.unpinnedCellContent
 
     Text(

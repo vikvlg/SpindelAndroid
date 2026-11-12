@@ -26,4 +26,22 @@ class RawDataViewModel @Inject constructor(
             }
         }
     }
+
+    /** Обработчик действий пользователя. **/
+    fun handleIntent(intent: RawDataIntent) {
+        when (intent) {
+            is RawDataIntent.ChangeSelected -> onChangeSelected(intent.id)
+        }
+    }
+
+    /** Изменение выделения элемента таблицы. **/
+    private fun onChangeSelected(id: Long) {
+        _uiState.update { value ->
+            value.copy(selected = value.selected.toggled(id))
+        }
+    }
 }
+
+fun <T> Set<T>.toggled(element: T): Set<T> =
+    if (element in this) this - element else this + element
+

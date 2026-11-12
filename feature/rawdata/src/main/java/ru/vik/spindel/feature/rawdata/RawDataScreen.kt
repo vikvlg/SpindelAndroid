@@ -32,11 +32,14 @@ internal const val SCROLL_TO_TOP_THRESHOLD = 10
 fun RawDataRoute(viewModel: RawDataViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    RawDataScreen(state)
+    RawDataScreen(state, viewModel::handleIntent)
 }
 
 @Composable
-fun RawDataScreen(state: RawDataState) {
+fun RawDataScreen(
+    state: RawDataState,
+    onIntent: (intent: RawDataIntent) -> Unit,
+) {
     val tableState = rememberDataTableState()
     val scope = rememberCoroutineScope()
     val columns: List<DataTableColumn<Metric>> = remember {
@@ -62,6 +65,8 @@ fun RawDataScreen(state: RawDataState) {
                 DataTable(
                     items = state.list,
                     key = { metric -> metric.id },
+                    selectedKeys = state.selected,
+                    onRowClick = { metric -> onIntent(RawDataIntent.ChangeSelected(metric.id)) },
                     columns = columns,
                     tableState = tableState,
                     //fixedRowHeader = false,
@@ -108,6 +113,7 @@ private fun RawDataContentPreview() {
     PreviewContainer {
         RawDataScreen(
             state = RawDataState(list = RawPreviewData.metricList),
+            onIntent = { }
         )
     }
 }
