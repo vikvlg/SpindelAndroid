@@ -24,6 +24,8 @@ object DataTableDefaults {
     val CellPadding = PaddingValues(horizontal = 8.dp)
     val GridLines = DataTableGridLines.All
     val GridLineThickness = 1.dp
+    val ScrollbarThickness = 4.dp
+    val ScrollbarMinThumbLength = 24.dp
 
     // Внутренние размеры наружу не выставляем
     internal val StartShadowWidth = 8.dp
@@ -37,6 +39,7 @@ object DataTableDefaults {
         @Composable get() = MaterialTheme.typography.bodyMedium
 
     const val SHADOW_ALPHA = 0.2f
+    const val SCROLLBAR_ALPHA = 0.5f
 
     @Composable
     fun colors(
@@ -50,6 +53,7 @@ object DataTableDefaults {
         divider: Color = MaterialTheme.colorScheme.outlineVariant,
         startShadow: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = SHADOW_ALPHA),
         endShadow: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = SHADOW_ALPHA),
+        scrollbarThumb: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = SCROLLBAR_ALPHA),
     ): DataTableColors = DataTableColors(
         headerBackground = headerBackground,
         pinnedBackground = pinnedBackground,
@@ -61,5 +65,6 @@ object DataTableDefaults {
         divider = divider,
         startShadow = startShadow,
         endShadow = endShadow,
+        scrollbarThumb = scrollbarThumb
     )
 }

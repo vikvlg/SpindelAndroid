@@ -1,7 +1,5 @@
 package ru.vik.spindel.core.designsystem.component.datatable.internal
 
-import androidx.compose.foundation.OverscrollEffect
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.TextStyle
@@ -9,6 +7,7 @@ import androidx.compose.ui.unit.Dp
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColors
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableGridLines
+import ru.vik.spindel.core.designsystem.component.datatable.DataTableState
 
 /** UI-параметры таблицы. **/
 @Immutable
@@ -25,8 +24,7 @@ internal data class DataTableSpec<T>(
     val colors: DataTableColors,
     val headerTextStyle: TextStyle,
     val cellTextStyle: TextStyle,
-    val scrollState: ScrollState,
-    val overscroll: OverscrollEffect?,
+    val tableState: DataTableState,
 )
 
 /** UI-параметры столбца таблицы. **/

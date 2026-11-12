@@ -1,8 +1,10 @@
 package ru.vik.spindel.core.designsystem.component.datatable
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,8 +17,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.overscroll
-import androidx.compose.foundation.rememberOverscrollEffect
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.withoutVisualEffect
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -33,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import ru.vik.spindel.core.designsystem.component.datatable.internal.DataTableSpec
 import ru.vik.spindel.core.designsystem.component.datatable.internal.ResolvedColumn
+import kotlin.math.max
 
 @Composable
 fun <T> DataTable(
@@ -41,6 +43,7 @@ fun <T> DataTable(
     columns: List<DataTableColumn<T>>,
     fixedColumnCount: Int = 1,
     fixedRowHeader: Boolean = true,
+    tableState: DataTableState = rememberDataTableState(),
     colors: DataTableColors = DataTableDefaults.colors(),
     headerHeight: Dp = DataTableDefaults.HeaderHeight,
     rowHeight: Dp = DataTableDefaults.RowHeight,
@@ -50,12 +53,9 @@ fun <T> DataTable(
     headerTextStyle: TextStyle = DataTableDefaults.headerTextStyle,
     cellTextStyle: TextStyle = DataTableDefaults.cellTextStyle,
 ) {
-    // Скроллы и эффект овер-скролла.
-    val scrollState = rememberScrollState()
-    val overscroll = rememberOverscrollEffect()
-
     // Расчет ширины закрепленных столбцов
     // TODO: Расчет ширины экрана и возможность растянуть Flexed столбцы.
+    // ИИ: Расчёт ширин оберните в remember.
     var pinnedWidth = Dp(0f)
     columns.forEachPinnedColumn(fixedColumnCount) { column ->
         when (column.width) {
@@ -63,6 +63,19 @@ fun <T> DataTable(
             is DataTableColumn.Width.Flexed -> throw Exception("Fixed columns require a fixed width. Column '${column.title}' has a flex width.")
         }
     }
+
+//    // TODO: Учитывать масштаб шрифта и увеличивать высоту строки.
+//    val textMeasurer = rememberTextMeasurer()
+//    val density = LocalDensity.current
+//    val resolvedRowHeight =
+//        remember(textMeasurer, density, cellTextStyle, rowHeight, cellPadding) {
+//            val textHeightPx = textMeasurer.measure("Ag", cellTextStyle).size.height
+//            with(density) {
+//                val verticalPadding =
+//                    cellPadding.calculateTopPadding() + cellPadding.calculateBottomPadding()
+//                max(rowHeight, textHeightPx.toDp() + verticalPadding)
+//            }
+//        }
 
     val spec = DataTableSpec(
         pinnedColumns = columns.filterPinnedColumn(fixedColumnCount).map { ResolvedColumn(it, it.calcWidth()) },
@@ -77,17 +90,26 @@ fun <T> DataTable(
         colors = colors,
         headerTextStyle = headerTextStyle,
         cellTextStyle = cellTextStyle,
-        scrollState = scrollState,
-        overscroll = overscroll
+        tableState = tableState,
     )
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            // Общий эффект овер-скролла на всю таблицу
-            .overscroll(overscroll)
+            .verticalScrollbar(
+                state = tableState.listState,
+                color = colors.scrollbarThumb,
+                topInset = spec.headerHeight,
+            )
+//                .weight(1f)
+//                .then(
+//                    tableState.listState.scrollIndicatorState?.let {
+//                        Modifier.nonInteractiveScrollbar(it, Orientation.Vertical)
+//                    } ?: Modifier
+//                ),
+            .overscroll(spec.tableState.overscroll) // Общий эффект овер-скролла на всю таблицу
             .horizontalScrollShadows(
-                state = scrollState,
+                state = tableState.horizontalScrollState,
                 pinnedWidth = pinnedWidth,
                 startShadowColor = colors.startShadow,
                 endShadowColor = colors.endShadow,
@@ -95,7 +117,7 @@ fun <T> DataTable(
     ) {
         spec.FixedHeader()
 
-        LazyColumn {
+        LazyColumn(state = tableState.listState) {
             item {
                 spec.FlexedHeader()
             }
@@ -136,12 +158,11 @@ private fun <T> DataTableSpec<T>.Header() {
             HeaderCell(column)
         }
         // Ячейки плавающих столбцов
-        val rowOverscroll = remember(overscroll) { overscroll?.withoutVisualEffect() }
+        val rowOverscroll = remember(tableState.overscroll) { tableState.overscroll?.withoutVisualEffect() }
         Row(modifier = Modifier
             .fillMaxWidth()
             .rowGridLine(gridLines, colors.divider, gridLineThickness)
-            // Переведем овер-скролл строки на всю таблицу.
-            .horizontalScroll(state = scrollState, overscrollEffect = rowOverscroll)
+            .horizontalScroll(state = tableState.horizontalScrollState, overscrollEffect = rowOverscroll) // Переведем овер-скролл строки на всю таблицу.
         ) {
             scrollableColumns.forEach { column ->
                 HeaderCell(column)
@@ -186,13 +207,12 @@ private fun <T> DataTableSpec<T>.Row(
         }
 
         // Плавающие столбцы
-        val rowOverscroll = remember(overscroll) { overscroll?.withoutVisualEffect() }
+        val rowOverscroll = remember(tableState.overscroll) { tableState.overscroll?.withoutVisualEffect() }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .rowGridLine(gridLines, colors.divider, gridLineThickness)
-                // Переведем овер-скролл строки на всю таблицу.
-                .horizontalScroll(state = scrollState, overscrollEffect = rowOverscroll)
+                .horizontalScroll(state = tableState.horizontalScrollState, overscrollEffect = rowOverscroll) // Переведем овер-скролл строки на всю таблицу.
         ) {
             scrollableColumns.forEach { column ->
                 Cell(
@@ -335,5 +355,45 @@ private fun <T> DataTableColumn<T>.calcWidth(): Dp {
     return when (width) {
         is DataTableColumn.Width.Fixed -> width.fixedWidth
         is DataTableColumn.Width.Flexed -> width.minWidth
+    }
+}
+
+// TODO: После выхода Material3 1.5.0 можно заменить на nonInteractiveScrollbar.
+@Composable
+internal fun Modifier.verticalScrollbar(
+    state: ScrollableState,
+    color: Color,
+    topInset: Dp,
+    thickness: Dp = DataTableDefaults.ScrollbarThickness,
+    minThumbLength: Dp = DataTableDefaults.ScrollbarMinThumbLength,
+): Modifier {
+    val scrolling = state.isScrollInProgress
+    val alpha by animateFloatAsState(
+        targetValue = if (scrolling) 1f else 0f,
+        animationSpec = if (scrolling) tween(150) else tween(300, delayMillis = 1000),
+        label = "scrollbarAlpha",
+    )
+    val indicator = state.scrollIndicatorState ?: return this
+
+    return drawWithContent {
+        drawContent()
+        val content = indicator.contentSize
+        val viewport = indicator.viewportSize
+        if (alpha == 0f || content <= viewport) return@drawWithContent
+
+        val w = thickness.toPx()
+        val trackTop = topInset.toPx()
+        val trackHeight = size.height - trackTop
+        val thumbLength = max(minThumbLength.toPx(), trackHeight * viewport / content)
+        val fraction = (indicator.scrollOffset.toFloat() / (content - viewport)).coerceIn(0f, 1f)
+        val top = trackTop + fraction * (trackHeight - thumbLength)
+
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(size.width - w, top),
+            size = Size(w, thumbLength),
+            cornerRadius = CornerRadius(w / 2),
+            alpha = alpha,
+        )
     }
 }
