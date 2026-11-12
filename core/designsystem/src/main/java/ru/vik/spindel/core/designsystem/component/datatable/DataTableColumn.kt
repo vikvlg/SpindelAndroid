@@ -15,7 +15,6 @@ data class DataTableColumn<T>(
     val width: Width,
     /** Выравнивание текста внутри ячейки. **/
     val textAlign: TextAlign? = null,
-    //val textAlign: Alignment.Horizontal = Alignment.Start,
     /** Текст ячейки. **/
     val text: (T) -> String
 ) {
