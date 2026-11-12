@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rawdata_debug_size_summary">Это таблица на %d строк</string>
+
+    <string name="rawdata_selection_info">Выделено строк: %d</string>
+</resources>

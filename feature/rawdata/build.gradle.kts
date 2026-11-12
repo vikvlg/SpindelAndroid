@@ -21,6 +21,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_21
     }
 
+    resourcePrefix = "rawdata_"
 }
 
 dependencies {

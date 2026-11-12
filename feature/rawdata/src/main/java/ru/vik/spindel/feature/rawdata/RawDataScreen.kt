@@ -1,8 +1,16 @@
 package ru.vik.spindel.feature.rawdata
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Card
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -11,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -59,7 +68,7 @@ fun RawDataScreen(
     Box {
         Column {
             Text(
-                text = "Это таблица на ${state.list.size} строк",
+                text = stringResource(R.string.rawdata_debug_size_summary, state.list.size),
             )
             Box(Modifier.weight(1f)) {
                 DataTable(
@@ -71,14 +80,53 @@ fun RawDataScreen(
                     tableState = tableState,
                     //fixedRowHeader = false,
                 )
-                ScrollToTopButton(
-                    visible = showScrollToTop,
-                    onClick = { scope.launch { tableState.animateScrollToTop() } },
+                Box(
                     modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(16.dp),
-                )
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp)
+                        .height(LocalMinimumInteractiveComponentSize.current)
+                        .padding(horizontal = 16.dp),
+                ) {
+                    FloatingSelectionInfo(
+                        visible = state.selected.isNotEmpty(),
+                        text = stringResource(R.string.rawdata_selection_info, state.selected.size),
+                        modifier = Modifier
+                            .align(Alignment.Center),
+                    )
+                    ScrollToTopButton(
+                        visible = showScrollToTop,
+                        onClick = { scope.launch { tableState.animateScrollToTop() } },
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd),
+                    )
+                }
             }
+        }
+    }
+}
+
+@Composable
+fun FloatingSelectionInfo(
+    visible: Boolean,
+    text: String,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = fadeIn(),
+        exit = fadeOut(),
+    ) {
+        Card {
+            // TODO: Добавить обработку клика и перемещение по выделенным строкам?
+            Text(
+                text = text,
+                modifier = Modifier
+                    .height(40.dp)
+                    .padding(horizontal = 16.dp)
+                    .wrapContentHeight(Alignment.CenterVertically)
+            )
         }
     }
 }
