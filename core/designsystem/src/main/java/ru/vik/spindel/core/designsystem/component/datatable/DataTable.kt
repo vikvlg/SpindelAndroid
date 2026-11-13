@@ -1,5 +1,6 @@
 package ru.vik.spindel.core.designsystem.component.datatable
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
@@ -33,8 +34,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import ru.vik.spindel.core.designsystem.R
 import ru.vik.spindel.core.designsystem.component.datatable.internal.DataTableSpec
 import ru.vik.spindel.core.designsystem.component.datatable.internal.ResolvedColumn
 import kotlin.math.max
@@ -49,6 +53,7 @@ fun <T> DataTable(
     fixedRowHeader: Boolean = true,
     onRowClick: GestureCallback<T> = null,
     onRowLongClick: GestureCallback<T> = null,
+    @StringRes placeHolderText: Int = R.string.designsystem_datatable_empty_list,
     tableState: DataTableState = rememberDataTableState(),
     colors: DataTableColors = DataTableDefaults.colors(),
     headerHeight: Dp = DataTableDefaults.HeaderHeight,
@@ -91,6 +96,7 @@ fun <T> DataTable(
         fixedRowHeader = fixedRowHeader,
         onRowClick = onRowClick,
         onRowLongClick = onRowLongClick,
+        placeHolderText = placeHolderText,
         //pinnedWidth = pinnedWidth,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
@@ -129,16 +135,33 @@ fun <T> DataTable(
     ) {
         spec.FixedHeader()
 
-        LazyColumn(state = tableState.listState) {
-            item {
-                spec.FlexedHeader()
-            }
+        if (items.isEmpty()) {
+            spec.PlaceHolder()
+        } else {
+            LazyColumn(state = tableState.listState) {
+                item {
+                    spec.FlexedHeader()
+                }
 
-            items(items = items, key = key) { item ->
-                spec.Row(item, selectedKeys.contains(key(item)))
+                items(items = items, key = key) { item ->
+                    spec.Row(item, selectedKeys.contains(key(item)))
+                }
             }
         }
     }
+}
+
+/** Заполнитель таблицы, когда нет данных. **/
+@Composable
+private fun <T> DataTableSpec<T>.PlaceHolder() {
+    Text(
+        modifier = Modifier
+            .fillMaxSize()
+            .wrapContentHeight(Alignment.CenterVertically),
+        text = stringResource(placeHolderText),
+        textAlign = TextAlign.Center,
+        color = colors.secondaryContent
+    )
 }
 
 /** Фиксированный заголовок таблицы. **/
@@ -164,6 +187,7 @@ private fun <T> DataTableSpec<T>.Header() {
         modifier = Modifier
             .height(headerHeight)
             .background(colors.headerBackground)
+            .rowGridLine(gridLines, colors.divider, gridLineThickness)
     ) {
         // Ячейки фиксированных столбцов
         pinnedColumns.forEach { column ->
@@ -173,7 +197,6 @@ private fun <T> DataTableSpec<T>.Header() {
         val rowOverscroll = remember(tableState.overscroll) { tableState.overscroll?.withoutVisualEffect() }
         Row(modifier = Modifier
             .fillMaxWidth()
-            .rowGridLine(gridLines, colors.divider, gridLineThickness)
             .horizontalScroll(state = tableState.horizontalScrollState, overscrollEffect = rowOverscroll) // Переведем овер-скролл строки на всю таблицу.
         ) {
             scrollableColumns.forEach { column ->

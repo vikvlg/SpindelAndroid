@@ -12,6 +12,7 @@ data class DataTableColors(
     val headerContent: Color,
     val pinnedCellContent: Color,
     val unpinnedCellContent: Color,
+    val secondaryContent: Color,
     /** TODO:
      * - Сетка между строками и столбцами (gridLine = outlineVariant)
      * - Под шапкой (headerDivider = outlineVariant)

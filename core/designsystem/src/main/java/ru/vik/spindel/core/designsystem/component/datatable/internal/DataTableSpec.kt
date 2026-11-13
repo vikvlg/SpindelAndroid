@@ -1,5 +1,6 @@
 package ru.vik.spindel.core.designsystem.component.datatable.internal
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
@@ -19,6 +20,7 @@ internal data class DataTableSpec<T>(
     val fixedRowHeader: Boolean,
     val onRowClick: GestureCallback<T>,
     val onRowLongClick: GestureCallback<T>,
+    @StringRes val placeHolderText: Int,
     //val pinnedWidth: Dp,
     val headerHeight: Dp,
     val rowHeight: Dp,
