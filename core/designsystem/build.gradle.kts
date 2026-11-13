@@ -19,6 +19,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+    resourcePrefix = "designsystem_"
 }
 
 dependencies {

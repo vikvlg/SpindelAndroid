@@ -31,7 +31,7 @@ fun ScrollToTopButton(
             Icon(
                 imageVector = Icons.Filled.KeyboardArrowUp,
 //                painter = painterResource(R.drawable.ic_arrow_upward),
-                contentDescription = stringResource(R.string.scroll_to_top),
+                contentDescription = stringResource(R.string.designsystem_scroll_to_top),
             )
         }
     }

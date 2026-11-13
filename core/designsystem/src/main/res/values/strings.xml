@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="scroll_to_top">Наверх</string>
+    <string name="designsystem_scroll_to_top">Наверх</string>
     <string name="designsystem_datatable_empty_list">Пустой список</string>
 </resources>
