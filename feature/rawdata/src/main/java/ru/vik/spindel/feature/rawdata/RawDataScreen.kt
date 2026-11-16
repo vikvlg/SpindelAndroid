@@ -116,6 +116,7 @@ fun RawDataScreen(
                 DataTable(
                     items = state.list,
                     key = { metric -> metric.id },
+                    isLoading = state.isMetricsLoading,
                     selectedKeys = state.selected,
                     onRowClick = { metric -> onIntent(RawDataIntent.ChangeRowSelected(metric.id)) },
                     columns = columns,

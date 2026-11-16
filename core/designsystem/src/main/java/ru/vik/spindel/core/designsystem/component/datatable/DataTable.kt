@@ -47,6 +47,7 @@ import kotlin.math.max
 fun <T> DataTable(
     items: List<T>,
     key: (T) -> Any,
+    isLoading: Boolean,
     selectedKeys: Set<Any> = emptySet(),
     columns: List<DataTableColumn<T>>,
     fixedColumnCount: Int = 1,
@@ -54,6 +55,7 @@ fun <T> DataTable(
     onRowClick: GestureCallback<T> = null,
     onRowLongClick: GestureCallback<T> = null,
     @StringRes placeHolderText: Int = R.string.designsystem_datatable_empty_list,
+    @StringRes loadingText: Int = R.string.designsystem_datatable_loading_list,
     tableState: DataTableState = rememberDataTableState(),
     colors: DataTableColors = DataTableDefaults.colors(),
     headerHeight: Dp = DataTableDefaults.HeaderHeight,
@@ -77,7 +79,8 @@ fun <T> DataTable(
         }
     }
 
-//    // TODO: Учитывать масштаб шрифта и увеличивать высоту строки.
+//    // TODO: Учитывать масштаб шрифта и увеличивать высоту строки,
+//    // в реальности это не нужно, т.к. минимально-рекомендуемой высоты в 48dp более чем достаточно даже для 200% шрифта.
 //    val textMeasurer = rememberTextMeasurer()
 //    val density = LocalDensity.current
 //    val resolvedRowHeight =
@@ -96,7 +99,7 @@ fun <T> DataTable(
         fixedRowHeader = fixedRowHeader,
         onRowClick = onRowClick,
         onRowLongClick = onRowLongClick,
-        placeHolderText = placeHolderText,
+        placeHolderText = if (isLoading) loadingText else placeHolderText,
         //pinnedWidth = pinnedWidth,
         headerHeight = headerHeight,
         rowHeight = rowHeight,

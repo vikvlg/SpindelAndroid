@@ -66,12 +66,12 @@ class RawDataViewModel @Inject constructor(
             metricsRepository.observeMetrics(brew?.id)
                 .onStart {
                     _uiState.update { value ->
-                        value.copy(list = emptyList(), selectedBrew = brew)
+                        value.copy(list = emptyList(), selectedBrew = brew, isMetricsLoading = true)
                     }
                 }
                 .collect { list ->
                     _uiState.update { value ->
-                        value.copy(list = list)
+                        value.copy(list = list, isMetricsLoading = false)
                     }
                 }
         }
