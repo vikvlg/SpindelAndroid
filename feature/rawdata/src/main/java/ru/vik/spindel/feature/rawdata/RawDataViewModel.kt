@@ -37,7 +37,7 @@ class RawDataViewModel @Inject constructor(
     /** Выбор варки для отображения метрик. **/
     private fun selectBrew(selection: BrewSelection) {
         _uiState.update { value ->
-            value.copy(selection = selection)
+            value.copy(brewPicker = value.brewPicker.copy(selection = selection))
         }
         when (selection) {
             is BrewSelection.Brew -> loadBrewMetrics(selection.brew)
@@ -49,14 +49,17 @@ class RawDataViewModel @Inject constructor(
     /** Изменение выделения элемента таблицы. **/
     private fun onRowChangeSelected(id: Long) {
         _uiState.update { value ->
-            value.copy(selected = value.selected.toggled(id))
+            value.copy(metrics = value.metrics.copy(selected = value.metrics.selected.toggled(id)))
         }
     }
 
     /** Очистка списка метрик. **/
     private fun clearBrewMetrics() {
         _uiState.update { value ->
-            value.copy(list = emptyList(), selectedBrew = null)
+            value.copy(
+                metrics = value.metrics.copy(list = emptyList()),
+                brewPicker = value.brewPicker.copy(selectedBrew = null)
+            )
         }
     }
 
@@ -66,12 +69,17 @@ class RawDataViewModel @Inject constructor(
             metricsRepository.observeMetrics(brew?.id)
                 .onStart {
                     _uiState.update { value ->
-                        value.copy(list = emptyList(), selectedBrew = brew, isMetricsLoading = true)
+                        value.copy(
+                            metrics = value.metrics.copy(list = emptyList(), isLoading = true),
+                            brewPicker = value.brewPicker.copy(selectedBrew = brew)
+                        )
                     }
                 }
                 .collect { list ->
                     _uiState.update { value ->
-                        value.copy(list = list, isMetricsLoading = false)
+                        value.copy(
+                            metrics = value.metrics.copy(list = list, isLoading = false)
+                        )
                     }
                 }
         }
@@ -85,7 +93,7 @@ class RawDataViewModel @Inject constructor(
                     val unassignedCount = brewMetrics.firstOrNull { it.brewId == null }?.count
                     if (unassignedCount != null) {
                         _uiState.update { value ->
-                            value.copy(unassignedCount = unassignedCount)
+                            value.copy(brewPicker = value.brewPicker.copy(unassignedCount = unassignedCount))
                         }
                     }
                     val counts = brewMetrics.associate { it.brewId to it.count }
@@ -93,7 +101,7 @@ class RawDataViewModel @Inject constructor(
                     brews.map { brew -> brew.toBrewUi(counts[brew.id] ?: 0) }
                 }
                 .collect { brewUiList ->
-                    _uiState.update { it.copy(brews = brewUiList) }
+                    _uiState.update { it.copy(brewPicker = it.brewPicker.copy(brews = brewUiList)) }
                 }
         }
     }

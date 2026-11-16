@@ -76,7 +76,7 @@ fun RawDataScreen(
     val title: String
     val subtitle: String?
     val isPlaceholder: Boolean
-    when (val selection = state.selection) {
+    when (val selection = state.brewPicker.selection) {
         BrewSelection.NotSelected -> {
             title = stringResource(R.string.rawdata_brew_not_selected)
             subtitle = null
@@ -88,8 +88,8 @@ fun RawDataScreen(
             isPlaceholder = false
         }
         is BrewSelection.Brew -> {
-            title = state.selectedBrew?.name.orEmpty()
-            subtitle = state.selectedBrew?.dateText
+            title = state.brewPicker.selectedBrew?.name.orEmpty()
+            subtitle = state.brewPicker.selectedBrew?.dateText
             isPlaceholder = false
         }
     }
@@ -114,10 +114,10 @@ fun RawDataScreen(
         ) {
             Box(Modifier.weight(1f)) {
                 DataTable(
-                    items = state.list,
+                    items = state.metrics.list,
                     key = { metric -> metric.id },
-                    isLoading = state.isMetricsLoading,
-                    selectedKeys = state.selected,
+                    isLoading = state.metrics.isLoading,
+                    selectedKeys = state.metrics.selected,
                     onRowClick = { metric -> onIntent(RawDataIntent.ChangeRowSelected(metric.id)) },
                     columns = columns,
                     tableState = tableState,
@@ -132,8 +132,8 @@ fun RawDataScreen(
                         .padding(horizontal = 16.dp),
                 ) {
                     FloatingSelectionInfo(
-                        visible = state.selected.isNotEmpty(),
-                        text = stringResource(R.string.rawdata_selection_info, state.selected.size),
+                        visible = state.metrics.selected.isNotEmpty(),
+                        text = stringResource(R.string.rawdata_selection_info, state.metrics.selected.size),
                         modifier = Modifier
                             .align(Alignment.Center),
                     )
@@ -150,9 +150,9 @@ fun RawDataScreen(
 
     if (showBrewPicker) {
         BrewPickerSheet(
-            brews = state.brews,
-            selection = state.selection,
-            unassignedCount = state.unassignedCount,
+            brews = state.brewPicker.brews,
+            selection = state.brewPicker.selection,
+            unassignedCount = state.brewPicker.unassignedCount,
             onSelect = { onIntent(RawDataIntent.SelectBrew(it)) },
             onDismiss = { showBrewPicker = false },
         )
@@ -213,7 +213,9 @@ fun FloatingSelectionInfo(
 private fun RawDataContentPreview() {
     PreviewContainer {
         RawDataScreen(
-            state = RawDataState(list = RawPreviewData.metricList),
+            state = RawDataState(
+                metrics = MetricsState(list = RawPreviewData.metricList),
+            ),
             onIntent = { }
         )
     }
