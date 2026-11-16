@@ -1,5 +1,6 @@
 package ru.vik.spindel.core.designsystem.component.datatable
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -8,7 +9,7 @@ import androidx.compose.ui.unit.Dp
 @Immutable
 data class DataTableColumn<T>(
     /** Заголовок столбца. **/
-    val title: String,
+    @StringRes val title: Int,
     /** Выравнивание текста заголовка столбца. **/
     val titleAlign: TextAlign? = TextAlign.Center,
     /** Ширина столбца. **/

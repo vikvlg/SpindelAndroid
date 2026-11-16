@@ -14,6 +14,12 @@
     <string name="rawdata_brew_section_search_results">Результаты поиска</string>
     <string name="rawdata_brew_not_selected">Варка не выбрана</string>
 
+    <string name="rawdata_column_id">№</string>
+    <string name="rawdata_column_date">Дата</string>
+    <string name="rawdata_column_gravity">Плотность</string>
+    <string name="rawdata_column_temperature">Температура</string>
+    <string name="rawdata_column_debug_text">Текст</string>
+
     <string name="rawdata_clear">rawdata_clear</string>
     <string name="rawdata_metrics_count">Метрик: %d</string>
 

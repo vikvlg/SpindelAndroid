@@ -1,5 +1,6 @@
 package ru.vik.spindel.feature.rawdata
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,6 +26,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,17 +60,9 @@ fun RawDataScreen(
     val tableState = rememberDataTableState()
     val scope = rememberCoroutineScope()
     //val context = LocalContext.current
-    val columns: List<DataTableColumn<Metric>> = remember {
-        listOf(
-            DataTableColumn(title = "№", width = DataTableColumn.Width.Fixed(36.dp)) { metric -> metric.id.toString() },
-            DataTableColumn(title = "Дата", width = DataTableColumn.Width.Fixed(100.dp)) { metric -> metric.date.toString() },
-            DataTableColumn(title = "Плотность", width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.gravity.toString() },
-            DataTableColumn(title = "Температура", width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.temperature.toString() },
-            DataTableColumn(title = "Текст", width = DataTableColumn.Width.Flexed(200.dp)) { metric -> if (metric.id % 2L == 0L) "Some very long long text" else "Text" },
-        )
-    }
+    val columns = rememberMetricsColumns()
 
-    val showScrollToTop by remember(tableState) {
+    val showScrollToTop by remember {
         derivedStateOf { tableState.firstVisibleRowIndex > SCROLL_TO_TOP_THRESHOLD }
     }
 
@@ -155,6 +149,20 @@ fun RawDataScreen(
             unassignedCount = state.brewPicker.unassignedCount,
             onSelect = { onIntent(RawDataIntent.SelectBrew(it)) },
             onDismiss = { showBrewPicker = false },
+        )
+    }
+}
+
+/** Создает описание столбцов таблицы. **/
+@Composable
+fun rememberMetricsColumns(): List<DataTableColumn<Metric>> {
+    return remember {
+        listOf(
+            DataTableColumn(title = R.string.rawdata_column_id, width = DataTableColumn.Width.Fixed(36.dp)) { metric -> metric.id.toString() },
+            DataTableColumn(title = R.string.rawdata_column_date, width = DataTableColumn.Width.Fixed(100.dp)) { metric -> metric.date.toString() },
+            DataTableColumn(title = R.string.rawdata_column_gravity, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.gravity.toString() },
+            DataTableColumn(title = R.string.rawdata_column_temperature, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.temperature.toString() },
+            DataTableColumn(title = R.string.rawdata_column_debug_text, width = DataTableColumn.Width.Flexed(200.dp)) { metric -> if (metric.id % 2L == 0L) "Some very long long text" else "Text" },
         )
     }
 }

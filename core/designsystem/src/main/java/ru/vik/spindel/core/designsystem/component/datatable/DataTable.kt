@@ -220,7 +220,7 @@ private fun <T> DataTableSpec<T>.HeaderCell(
             .width(column.width)
             .padding(cellPadding)
             .wrapContentHeight(headerVerticalAlign),
-        text = column.column.title,
+        text = stringResource(column.column.title),
         textAlign = column.column.titleAlign,
         color = colors.headerContent,
         style = headerTextStyle,
