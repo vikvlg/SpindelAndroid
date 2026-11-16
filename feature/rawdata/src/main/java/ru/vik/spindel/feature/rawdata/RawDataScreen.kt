@@ -10,13 +10,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -32,7 +38,6 @@ import ru.vik.spindel.core.designsystem.component.datatable.DataTable
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
 import ru.vik.spindel.core.designsystem.component.datatable.rememberDataTableState
 import ru.vik.spindel.core.metrics.api.Metric
-import kotlin.collections.listOf
 
 /** Количество строк таблицы для прокрутки, чтобы появилась кнопка "Наверх". **/
 internal const val SCROLL_TO_TOP_THRESHOLD = 10
@@ -44,6 +49,7 @@ fun RawDataRoute(viewModel: RawDataViewModel = hiltViewModel()) {
     RawDataScreen(state, viewModel::handleIntent)
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RawDataScreen(
     state: RawDataState,
@@ -51,6 +57,7 @@ fun RawDataScreen(
 ) {
     val tableState = rememberDataTableState()
     val scope = rememberCoroutineScope()
+    //val context = LocalContext.current
     val columns: List<DataTableColumn<Metric>> = remember {
         listOf(
             DataTableColumn(title = "№", width = DataTableColumn.Width.Fixed(36.dp)) { metric -> metric.id.toString() },
@@ -65,17 +72,52 @@ fun RawDataScreen(
         derivedStateOf { tableState.firstVisibleRowIndex > SCROLL_TO_TOP_THRESHOLD }
     }
 
-    Box {
-        Column {
-            Text(
-                text = stringResource(R.string.rawdata_debug_size_summary, state.list.size),
+    var showBrewPicker by rememberSaveable { mutableStateOf(false) }
+    val title: String
+    val subtitle: String?
+    val isPlaceholder: Boolean
+    when (val selection = state.selection) {
+        BrewSelection.NotSelected -> {
+            title = stringResource(R.string.rawdata_brew_not_selected)
+            subtitle = null
+            isPlaceholder = true
+        }
+        BrewSelection.Unassigned -> {
+            title = stringResource(R.string.rawdata_brew_unassigned)
+            subtitle = null
+            isPlaceholder = false
+        }
+        is BrewSelection.Brew -> {
+            title = state.selectedBrew?.name.orEmpty()
+            subtitle = state.selectedBrew?.dateText
+            isPlaceholder = false
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    BrewSelectorTitle(
+                        title = title,
+                        subtitle = subtitle,
+                        isPlaceholder = isPlaceholder,
+                        expanded = showBrewPicker,
+                        onClick = { showBrewPicker = true },
+                    )
+                },
             )
+        },
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier.padding(innerPadding)
+        ) {
             Box(Modifier.weight(1f)) {
                 DataTable(
                     items = state.list,
                     key = { metric -> metric.id },
                     selectedKeys = state.selected,
-                    onRowClick = { metric -> onIntent(RawDataIntent.ChangeSelected(metric.id)) },
+                    onRowClick = { metric -> onIntent(RawDataIntent.ChangeRowSelected(metric.id)) },
                     columns = columns,
                     tableState = tableState,
                     //fixedRowHeader = false,
@@ -103,6 +145,16 @@ fun RawDataScreen(
                 }
             }
         }
+    }
+
+    if (showBrewPicker) {
+        BrewPickerSheet(
+            brews = state.brews,
+            selection = state.selection,
+            unassignedCount = state.unassignedCount,
+            onSelect = { onIntent(RawDataIntent.SelectBrew(it)) },
+            onDismiss = { showBrewPicker = false },
+        )
     }
 }
 

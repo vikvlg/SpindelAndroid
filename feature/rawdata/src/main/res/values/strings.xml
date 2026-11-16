@@ -3,4 +3,18 @@
     <string name="rawdata_debug_size_summary">Это таблица на %d строк</string>
 
     <string name="rawdata_selection_info">Выделено строк: %d</string>
+    <string name="rawdata_selector_action">Дважды нажмите, чтобы выбрать варку</string>
+    <string name="rawdata_brew_picker_title">Выберите варку</string>
+    <string name="rawdata_brew_picker_search">Поиск</string>
+    <string name="rawdata_brew_picker_nothing_found">Ничего не найдено</string>
+    <string name="rawdata_brew_unassigned">Данные без варки</string>
+    <string name="rawdata_brew_section_recent">Недавние</string>
+    <string name="rawdata_brew_section_active">Активные</string>
+    <string name="rawdata_brew_section_finished">section_finished</string>
+    <string name="rawdata_brew_section_search_results">Результаты поиска</string>
+    <string name="rawdata_brew_not_selected">Варка не выбрана</string>
+
+    <string name="rawdata_clear">rawdata_clear</string>
+    <string name="rawdata_metrics_count">Метрик: %d</string>
+
 </resources>

@@ -6,38 +6,100 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.vik.spindel.core.brews.api.BrewRepository
 import ru.vik.spindel.core.metrics.api.MetricsRepository
 
 @HiltViewModel
 class RawDataViewModel @Inject constructor(
-    private val repository: MetricsRepository
+    private val brewRepository: BrewRepository,
+    private val metricsRepository: MetricsRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RawDataState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        // DEBUG TODO: Тестовое получение каких-то данных.
-        viewModelScope.launch {
-            repository.observeMetrics(1).collect { list ->
-                _uiState.update { RawDataState(list = list) }
-            }
-        }
+        loadBrewList()
     }
 
     /** Обработчик действий пользователя. **/
     fun handleIntent(intent: RawDataIntent) {
         when (intent) {
-            is RawDataIntent.ChangeSelected -> onChangeSelected(intent.id)
+            is RawDataIntent.ChangeRowSelected -> onRowChangeSelected(intent.id)
+            is RawDataIntent.SelectBrew -> selectBrew(intent.selection)
+        }
+    }
+
+    /** Выбор варки для отображения метрик. **/
+    private fun selectBrew(selection: BrewSelection) {
+        _uiState.update { value ->
+            value.copy(selection = selection)
+        }
+        when (selection) {
+            is BrewSelection.Brew -> loadBrewMetrics(selection.brew)
+            is BrewSelection.NotSelected -> clearBrewMetrics()
+            is BrewSelection.Unassigned -> loadBrewMetrics(null)
         }
     }
 
     /** Изменение выделения элемента таблицы. **/
-    private fun onChangeSelected(id: Long) {
+    private fun onRowChangeSelected(id: Long) {
         _uiState.update { value ->
             value.copy(selected = value.selected.toggled(id))
+        }
+    }
+
+    /** Очистка списка метрик. **/
+    private fun clearBrewMetrics() {
+        _uiState.update { value ->
+            value.copy(list = emptyList(), selectedBrew = null)
+        }
+    }
+
+    /** Загрузка списка метрик варки. **/
+    private fun loadBrewMetrics(brew: BrewUi?) {
+        viewModelScope.launch {
+            metricsRepository.observeMetrics(brew?.id)
+                .onStart {
+                    _uiState.update { value ->
+                        value.copy(list = emptyList(), selectedBrew = brew)
+                    }
+                }
+                .collect { list ->
+                    _uiState.update { value ->
+                        value.copy(list = list)
+                    }
+                }
+        }
+    }
+
+    /** Загрузка списка варок. **/
+    private fun loadBrewList() {
+        viewModelScope.launch {
+            brewRepository.observeBrews()
+                .combine(metricsRepository.observeCountsByBrew()) { brews, brewMetrics ->
+                    val unassignedCount = brewMetrics.firstOrNull { it.brewId == null }?.count
+                    if (unassignedCount != null) {
+                        _uiState.update { value ->
+                            value.copy(unassignedCount = unassignedCount)
+                        }
+                    }
+
+                    brews.map { brew ->
+                        val count = brewMetrics.firstOrNull { it.brewId == brew.id}?.count ?: 0
+                        brew.toBrewUi(count)
+                    }
+                }
+                .collect { list ->
+                //Log.d("TEST", "loadBrewList.list.size: ${list.size}")
+                _uiState.update { value ->
+                    value.copy(brews = list)
+                }
+            }
         }
     }
 }
