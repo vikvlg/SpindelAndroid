@@ -1,6 +1,5 @@
 package ru.vik.spindel.feature.rawdata
 
-import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -26,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +36,7 @@ import ru.vik.spindel.core.designsystem.ScreenPreviews
 import ru.vik.spindel.core.designsystem.component.ScrollToTopButton
 import ru.vik.spindel.core.designsystem.component.datatable.DataTable
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
+import ru.vik.spindel.core.designsystem.component.datatable.DataTableState
 import ru.vik.spindel.core.designsystem.component.datatable.rememberDataTableState
 import ru.vik.spindel.core.metrics.api.Metric
 
@@ -58,14 +57,7 @@ fun RawDataScreen(
     onIntent: (intent: RawDataIntent) -> Unit,
 ) {
     val tableState = rememberDataTableState()
-    val scope = rememberCoroutineScope()
-    //val context = LocalContext.current
     val columns = rememberMetricsColumns()
-
-    val showScrollToTop by remember {
-        derivedStateOf { tableState.firstVisibleRowIndex > SCROLL_TO_TOP_THRESHOLD }
-    }
-
     var showBrewPicker by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
@@ -97,27 +89,11 @@ fun RawDataScreen(
                     tableState = tableState,
                     //fixedRowHeader = false,
                 )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp)
-                        .height(LocalMinimumInteractiveComponentSize.current)
-                        .padding(horizontal = 16.dp),
-                ) {
-                    FloatingSelectionInfo(
-                        visible = state.metrics.selected.isNotEmpty(),
-                        text = stringResource(R.string.rawdata_selection_info, state.metrics.selected.size),
-                        modifier = Modifier
-                            .align(Alignment.Center),
-                    )
-                    ScrollToTopButton(
-                        visible = showScrollToTop,
-                        onClick = { scope.launch { tableState.animateScrollToTop() } },
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd),
-                    )
-                }
+                BottomBar(
+                    state = state,
+                    tableState = tableState,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
             }
         }
     }
@@ -133,22 +109,45 @@ fun RawDataScreen(
     }
 }
 
-/** Создает описание столбцов таблицы. **/
+/**
+ * Нижняя панель экрана:
+ *  - информация по выделенным строкам таблицы;
+ *  - кнопка "наверх".
+ */
 @Composable
-fun rememberMetricsColumns(): List<DataTableColumn<Metric>> {
-    return remember {
-        listOf(
-            DataTableColumn(title = R.string.rawdata_column_id, width = DataTableColumn.Width.Fixed(36.dp)) { metric -> metric.id.toString() },
-            DataTableColumn(title = R.string.rawdata_column_date, width = DataTableColumn.Width.Fixed(100.dp)) { metric -> metric.date.toString() },
-            DataTableColumn(title = R.string.rawdata_column_gravity, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.gravity.toString() },
-            DataTableColumn(title = R.string.rawdata_column_temperature, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.temperature.toString() },
-            DataTableColumn(title = R.string.rawdata_column_debug_text, width = DataTableColumn.Width.Flexed(200.dp)) { metric -> if (metric.id % 2L == 0L) "Some very long long text" else "Text" },
+private fun BottomBar(
+    state: RawDataState,
+    tableState: DataTableState,
+    modifier: Modifier = Modifier
+) {
+    val scope = rememberCoroutineScope()
+    val showScrollToTop by remember {
+        derivedStateOf { tableState.firstVisibleRowIndex > SCROLL_TO_TOP_THRESHOLD }
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp)
+            .height(LocalMinimumInteractiveComponentSize.current)
+            .padding(horizontal = 16.dp),
+    ) {
+        FloatingSelectionInfo(
+            visible = state.metrics.selected.isNotEmpty(),
+            text = stringResource(R.string.rawdata_selection_info, state.metrics.selected.size),
+            modifier = Modifier.align(Alignment.Center),
+        )
+        ScrollToTopButton(
+            visible = showScrollToTop,
+            onClick = { scope.launch { tableState.animateScrollToTop() } },
+            modifier = Modifier.align(Alignment.CenterEnd),
         )
     }
 }
 
+/** Плашка с информацией о выделенных строках таблицы. **/
 @Composable
-fun FloatingSelectionInfo(
+private fun FloatingSelectionInfo(
     visible: Boolean,
     text: String,
     modifier: Modifier = Modifier,
@@ -160,7 +159,7 @@ fun FloatingSelectionInfo(
         exit = fadeOut(),
     ) {
         Card {
-            // TODO: Добавить обработку клика и перемещение по выделенным строкам?
+            // TODO [2026.11.16]: Добавить обработку клика и перемещение по выделенным строкам?
             Text(
                 text = text,
                 modifier = Modifier
@@ -172,29 +171,19 @@ fun FloatingSelectionInfo(
     }
 }
 
-/*
-
-Что получает компонент строки:
-• UI-модель строки;
-• isSelected: Boolean, а не весь набор выделенных ID;
-• selectionMode: Boolean;
-• hState;
-• обработчики onClick(id) и onLongClick(id).
-
-Жесты
-На всю строку вешается combinedClickable с обработчиками нажатия и долгого нажатия.
-• Нажатие
-  Обычный режим: открыть карточку записи (если будет) или ничего
-  Режим выделения: отметить или снять отметку
-• Долгое нажатие
-  Обычный режим: войти в режим и выделить строку, с вибрацией
-  Режим выделения: выделить диапазон (см. ниже)
-
-Подводные камни этой схемы
-2. Свайп по закреплённому столбцу таблицу вбок не двигает, потому что он вне скролла.
-Обычно это никому не мешает. При желании можно повесить обработку горизонтального жеста на всю строку, но это уже тонкая настройка.
-
-*/
+/** Создает описание столбцов таблицы. **/
+@Composable
+private fun rememberMetricsColumns(): List<DataTableColumn<Metric>> {
+    return remember {
+        listOf(
+            DataTableColumn(title = R.string.rawdata_column_id, width = DataTableColumn.Width.Fixed(36.dp)) { metric -> metric.id.toString() },
+            DataTableColumn(title = R.string.rawdata_column_date, width = DataTableColumn.Width.Fixed(100.dp)) { metric -> metric.date.toString() },
+            DataTableColumn(title = R.string.rawdata_column_gravity, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.gravity.toString() },
+            DataTableColumn(title = R.string.rawdata_column_temperature, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.temperature.toString() },
+            DataTableColumn(title = R.string.rawdata_column_debug_text, width = DataTableColumn.Width.Flexed(200.dp)) { it.debugText },
+        )
+    }
+}
 
 @ScreenPreviews
 @Composable
@@ -208,3 +197,7 @@ private fun RawDataContentPreview() {
         )
     }
 }
+
+/** Отладочный текст для проверки горизонтального скролла таблицы. **/
+private val Metric.debugText: String
+    get() = if (id % 2L == 0L) "Some very long long text" else "Text"
