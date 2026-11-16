@@ -5,6 +5,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
@@ -12,6 +13,7 @@ import kotlinx.coroutines.sync.withLock
 import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.database.api.DatabaseRepository
 import ru.vik.spindel.core.devices.api.Device
+import ru.vik.spindel.core.metrics.api.BrewMetricCount
 import ru.vik.spindel.core.metrics.api.Metric
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -36,13 +38,17 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     private val mutex = Mutex()
     private val brewsState = MutableStateFlow<List<Brew>>(brewList)
     private val devicesState = MutableStateFlow<List<Device>>(deviceList)
-    private val metricsState: MutableMap<Long, MutableStateFlow<List<Metric>>> = mutableMapOf() //MutableStateFlow<List<Metric>>(brewList)
+    private val metricsState: MutableMap<Long?, MutableStateFlow<List<Metric>>> = mutableMapOf() //MutableStateFlow<List<Metric>>(brewList)
+
+    init {
+        addNewMetrics(brewId = null)
+    }
 
     override fun observeBrews(): Flow<List<Brew>> =
         brewsState
             .asStateFlow()
             .onStart {
-                delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+                simulateDbDelay()
             }
 
     override suspend fun addBrews(list: List<Brew>) {
@@ -64,7 +70,7 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
 
     override suspend fun getBrew(brewId: Long): Brew? {
         mutex.withLock {
-            delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+            simulateDbDelay()
             return brewsState.value.find { brew -> brew.id == brewId }
         }
     }
@@ -73,7 +79,7 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
         devicesState
             .asStateFlow()
             .onStart {
-                delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+                simulateDbDelay()
             }
 
     override suspend fun addDevice(device: Device) {
@@ -100,25 +106,67 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
         }
     }
 
-    override fun observeMetrics(brewId: Long): Flow<List<Metric>> {
+    override fun observeMetrics(brewId: Long?): Flow<List<Metric>> {
         var state = metricsState[brewId]
         if (state == null) {
             // BUG: Тут в теории может быть ошибка из-за прямого обращения к brewsState.value без Mutex.
             val brew = brewsState.value.find { brew -> brew.id == brewId }
-            val startBrewTime = brew?.date ?: LocalDateTime.now()
-            state = MutableStateFlow(generateMetrics(startBrewTime))
-            metricsState[brewId] = state
+            state = addNewMetrics(brewId, brew?.date)
         }
 
         return state
             .asStateFlow()
             .onStart {
-                delay(500.milliseconds) // Имитация внутренних задержек при работе с локальной БД
+                simulateDbDelay()
             }
     }
 
     override suspend fun addMetrics(brewId: Long, list: List<Metric>) {
         // TODO: .
+    }
+
+    override fun observeCountsByBrew(): Flow<List<BrewMetricCount>> {
+        return brewsState
+            .asStateFlow()
+            .onStart {
+                simulateDbDelay()
+            }
+            .map { list ->
+                list.map { brew ->
+                    val state = metricsState[brew.id] ?: addNewMetrics(brew.id, brew.date)
+                    BrewMetricCount(brew.id, state.value.size)
+                } + BrewMetricCount(null, metricsState[null]?.value?.size ?: 0)
+            }
+    }
+
+    private fun addNewMetrics(brewId: Long?, startTime: LocalDateTime? = null): MutableStateFlow<List<Metric>> {
+        val startBrewTime = startTime ?: LocalDateTime.now()
+        val list = if (brewId == null) {
+            generateTrashMetrics(startBrewTime)
+        } else {
+            generateMetrics(startBrewTime)
+        }
+        val state = MutableStateFlow(list)
+        metricsState[brewId] = state
+        return state
+    }
+
+    private fun generateTrashMetrics(startTime: LocalDateTime = LocalDateTime.now()): List<Metric> {
+        val count = Random.nextInt(3, 10)
+        var time = startTime.minusDays(7)
+        return buildList {
+            for (i in 0..<count) {
+                add(
+                    Metric(
+                        id = i + 1L,
+                        date = time,
+                        gravity = Random.nextDouble(5.0, 25.0),
+                        temperature = Random.nextDouble(10.0, 45.0),
+                    )
+                )
+                time = time.plusMinutes(Random.nextLong(55, 65))
+            }
+        }
     }
 
     private fun generateMetrics(startTime: LocalDateTime = LocalDateTime.now()): List<Metric> {
@@ -136,24 +184,8 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
             duration,
             startTemperature,
             targetTemperature)
-
-
-//        // Линейное изменение плотности
-//        val endGravity = startGravity - startGravity * attenuation
-//        val count = duration * 24
-//        val deltaGravity = startGravity - endGravity
-//        val stepGravity = deltaGravity / count
-//        val list = mutableListOf<Metric>()
-//        for (i in 0..<count) {
-//            val gravity = startGravity - i * stepGravity - Random.nextDouble(-0.1, 0.1)
-//            val metric = Metric(
-//                id = metricKey,
-//                date = startTime.plusHours(i.toLong()),
-//                gravity = gravity,
-//                temperature = 15.0 + Random.nextDouble(-1.5, 1.5))
-//            list.add(metric)
-//        }
-//
-//        return list.toList()
     }
+
+    /** Имитация внутренних задержек при работе с локальной БД. **/
+    private suspend fun simulateDbDelay() = delay(2000.milliseconds)
 }
