@@ -67,35 +67,15 @@ fun RawDataScreen(
     }
 
     var showBrewPicker by rememberSaveable { mutableStateOf(false) }
-    val title: String
-    val subtitle: String?
-    val isPlaceholder: Boolean
-    when (val selection = state.brewPicker.selection) {
-        BrewSelection.NotSelected -> {
-            title = stringResource(R.string.rawdata_brew_not_selected)
-            subtitle = null
-            isPlaceholder = true
-        }
-        BrewSelection.Unassigned -> {
-            title = stringResource(R.string.rawdata_brew_unassigned)
-            subtitle = null
-            isPlaceholder = false
-        }
-        is BrewSelection.Brew -> {
-            title = state.brewPicker.selectedBrew?.name.orEmpty()
-            subtitle = state.brewPicker.selectedBrew?.dateText
-            isPlaceholder = false
-        }
-    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     BrewSelectorTitle(
-                        title = title,
-                        subtitle = subtitle,
-                        isPlaceholder = isPlaceholder,
+                        title = state.brewSelector.title.asString(),
+                        subtitle = state.brewSelector.subtitle,
+                        isPlaceholder = state.brewSelector.isPlaceholder,
                         expanded = showBrewPicker,
                         onClick = { showBrewPicker = true },
                     )
