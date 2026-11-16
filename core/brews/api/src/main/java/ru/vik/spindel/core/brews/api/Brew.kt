@@ -6,4 +6,5 @@ data class Brew(
     val id: Long,
     val name: String,
     val date: LocalDateTime,
+    val isActive: Boolean,
 )

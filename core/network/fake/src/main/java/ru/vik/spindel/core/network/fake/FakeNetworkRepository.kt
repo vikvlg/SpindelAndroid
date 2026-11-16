@@ -40,9 +40,9 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
         if (brewListRefreshCounter++ == 0L) {
             brewList.addAll(
                 listOf(
-                    Brew(++brewKey, "Светлый эль", LocalDateTime.of(2026, 7, 1, 14, 0, 0)),
-                    Brew(++brewKey, "IPA осенний", LocalDateTime.of(2026, 9, 18, 14, 0, 0)),
-                    Brew(++brewKey, "Тыквенный эль", LocalDateTime.of(2026, 10, 1, 14, 0, 0)),
+                    Brew(++brewKey, "Светлый эль", LocalDateTime.of(2026, 7, 1, 14, 0, 0), true),
+                    Brew(++brewKey, "IPA осенний", LocalDateTime.of(2026, 9, 18, 14, 0, 0), true),
+                    Brew(++brewKey, "Тыквенный эль", LocalDateTime.of(2026, 10, 1, 14, 0, 0), true),
                 )
             )
         }

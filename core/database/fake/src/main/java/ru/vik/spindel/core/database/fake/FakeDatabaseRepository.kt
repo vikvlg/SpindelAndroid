@@ -24,12 +24,12 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     private var deviceKey: Long = 0
     private var metricKey: Long = 0
     private val brewList: MutableList<Brew> = mutableListOf(
-        Brew(++brewKey, "Рождественский грог", LocalDateTime.of(2026, 1, 7, 12, 0, 0)),
-        Brew(++brewKey, "Стаут", LocalDateTime.of(2026, 1, 28, 12, 0, 0)),
-        Brew(++brewKey, "Milkshake", LocalDateTime.of(2026, 2, 14, 12, 0, 0)),
-        Brew(++brewKey, "Первомайская варка", LocalDateTime.of(2026, 5, 1, 12, 0, 0)),
-        Brew(++brewKey, "Майская варка", LocalDateTime.of(2026, 5, 20, 12, 0, 0)),
-        Brew(++brewKey, "Быстролагер", LocalDateTime.of(2026, 6, 3, 12, 0, 0)),
+        Brew(++brewKey, "Рождественский грог", LocalDateTime.of(2026, 1, 7, 12, 0, 0), false),
+        Brew(++brewKey, "Стаут", LocalDateTime.of(2026, 1, 28, 12, 0, 0), false),
+        Brew(++brewKey, "Milkshake", LocalDateTime.of(2026, 2, 14, 12, 0, 0), false),
+        Brew(++brewKey, "Первомайская варка", LocalDateTime.of(2026, 5, 1, 12, 0, 0), false),
+        Brew(++brewKey, "Майская варка", LocalDateTime.of(2026, 5, 20, 12, 0, 0), false),
+        Brew(++brewKey, "Быстролагер", LocalDateTime.of(2026, 6, 3, 12, 0, 0), false),
     )
     private val deviceList: List<Device> = listOf(
         Device(++deviceKey, "Первый"),
