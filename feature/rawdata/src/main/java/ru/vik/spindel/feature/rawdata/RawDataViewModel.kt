@@ -88,18 +88,13 @@ class RawDataViewModel @Inject constructor(
                             value.copy(unassignedCount = unassignedCount)
                         }
                     }
+                    val counts = brewMetrics.associate { it.brewId to it.count }
 
-                    brews.map { brew ->
-                        val count = brewMetrics.firstOrNull { it.brewId == brew.id}?.count ?: 0
-                        brew.toBrewUi(count)
-                    }
+                    brews.map { brew -> brew.toBrewUi(counts[brew.id] ?: 0) }
                 }
-                .collect { list ->
-                //Log.d("TEST", "loadBrewList.list.size: ${list.size}")
-                _uiState.update { value ->
-                    value.copy(brews = list)
+                .collect { brewUiList ->
+                    _uiState.update { it.copy(brews = brewUiList) }
                 }
-            }
         }
     }
 }
