@@ -3,6 +3,7 @@ package ru.vik.spindel.feature.rawdata
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -123,7 +124,7 @@ fun RawDataScreen(
 private fun BottomBar(
     state: RawDataState,
     tableState: DataTableState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
     val showScrollToTop by remember {
@@ -140,6 +141,14 @@ private fun BottomBar(
         FloatingSelectionInfo(
             visible = state.metrics.selected.isNotEmpty(),
             text = stringResource(R.string.rawdata_selection_info, state.metrics.selected.size),
+            onClick = {
+                // Перемещение между выделенными строками
+                scope.launch {
+                    tableState.animateScrollToNextMatchingRow(state.metrics.list) { metric ->
+                        metric.id in state.metrics.selected
+                    }
+                }
+            },
             modifier = Modifier.align(Alignment.Center),
         )
         ScrollToTopButton(
@@ -155,6 +164,7 @@ private fun BottomBar(
 private fun FloatingSelectionInfo(
     visible: Boolean,
     text: String,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     AnimatedVisibility(
@@ -164,13 +174,13 @@ private fun FloatingSelectionInfo(
         exit = fadeOut(),
     ) {
         Card {
-            // TODO [2026.11.16]: Добавить обработку клика и перемещение по выделенным строкам?
             Text(
                 text = text,
                 modifier = Modifier
                     .height(40.dp)
                     .padding(horizontal = 16.dp)
                     .wrapContentHeight(Alignment.CenterVertically)
+                    .clickable(onClick = onClick)
             )
         }
     }

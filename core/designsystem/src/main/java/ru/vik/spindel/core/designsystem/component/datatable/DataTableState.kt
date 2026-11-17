@@ -25,6 +25,29 @@ class DataTableState internal constructor(
     val isScrolledFromTop: Boolean
         get() = listState.canScrollBackward
 
+    /**
+     * Прокручивает таблицу к следующей строке, подходящей под условие [predicate].
+     * Если дошли до конца, начинает поиск с начала (циклический переход).
+     */
+    suspend fun <T> animateScrollToNextMatchingRow(
+        items: List<T>,
+        predicate: (T) -> Boolean
+    ) {
+        if (items.isEmpty() || !listState.canScrollForward) return
+
+        val currentIndex = firstVisibleRowIndex
+        // Ищем подходящую строку после текущей позиции
+        val nextIndex = items.withIndex()
+            .firstOrNull { (index, item) -> index > currentIndex && predicate(item) }
+            ?.index
+        // Если ниже подходящих строк нет — ищем с самого начала таблицы
+            ?: items.indexOfFirst(predicate)
+
+        if (nextIndex != -1) {
+            listState.animateScrollToItem(nextIndex)
+        }
+    }
+
     /** Прокручивает таблицу наверх с анимацией. **/
     suspend fun animateScrollToTop() {
         listState.animateScrollToItem(0)
