@@ -61,7 +61,7 @@ class RawDataViewModel @Inject constructor(
     private fun clearBrewMetrics() {
         _uiState.update { value ->
             value.copy(
-                metrics = value.metrics.copy(list = emptyList()),
+                metrics = MetricsState(),
                 brewPicker = value.brewPicker.copy(selectedBrew = null)
             )
         }
@@ -74,7 +74,7 @@ class RawDataViewModel @Inject constructor(
                 .onStart {
                     _uiState.update { value ->
                         value.copy(
-                            metrics = value.metrics.copy(list = emptyList(), isLoading = true),
+                            metrics = MetricsState().copy(isLoading = true),
                             brewPicker = value.brewPicker.copy(selectedBrew = brew)
                         )
                     }
