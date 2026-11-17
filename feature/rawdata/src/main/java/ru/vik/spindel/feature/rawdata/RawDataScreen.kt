@@ -76,6 +76,7 @@ fun RawDataScreen(
                         onClick = { showBrewPicker = true },
                     )
                 },
+                windowInsets = WindowInsets(), // Убираем верхний отступ
             )
         },
         contentWindowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top), // Убираем нижний отступ
