@@ -43,7 +43,6 @@ import ru.vik.spindel.core.designsystem.component.datatable.DataTable
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableState
 import ru.vik.spindel.core.designsystem.component.datatable.rememberDataTableState
-import ru.vik.spindel.core.metrics.api.Metric
 
 /** Количество строк таблицы для прокрутки, чтобы появилась кнопка "Наверх". **/
 internal const val SCROLL_TO_TOP_THRESHOLD = 10
@@ -188,13 +187,13 @@ private fun FloatingSelectionInfo(
 
 /** Создает описание столбцов таблицы. **/
 @Composable
-private fun rememberMetricsColumns(): List<DataTableColumn<Metric>> {
+private fun rememberMetricsColumns(): List<DataTableColumn<MetricUi>> {
     return remember {
         listOf(
             DataTableColumn(title = R.string.rawdata_column_id, width = DataTableColumn.Width.Fixed(36.dp)) { metric -> metric.id.toString() },
-            DataTableColumn(title = R.string.rawdata_column_date, width = DataTableColumn.Width.Fixed(100.dp)) { metric -> metric.date.toString() },
-            DataTableColumn(title = R.string.rawdata_column_gravity, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.gravity.toString() },
-            DataTableColumn(title = R.string.rawdata_column_temperature, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.temperature.toString() },
+            DataTableColumn(title = R.string.rawdata_column_date, width = DataTableColumn.Width.Fixed(100.dp)) { metric -> metric.dateText },
+            DataTableColumn(title = R.string.rawdata_column_gravity, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.gravityText },
+            DataTableColumn(title = R.string.rawdata_column_temperature, width = DataTableColumn.Width.Fixed(64.dp), textAlign = TextAlign.End) { metric -> metric.temperatureText },
             DataTableColumn(title = R.string.rawdata_column_debug_text, width = DataTableColumn.Width.Flexed(200.dp)) { it.debugText },
         )
     }
@@ -214,5 +213,5 @@ private fun RawDataContentPreview() {
 }
 
 /** Отладочный текст для проверки горизонтального скролла таблицы. **/
-private val Metric.debugText: String
+private val MetricUi.debugText: String
     get() = if (id % 2L == 0L) "Some very long long text" else "Text"

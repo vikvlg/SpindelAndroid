@@ -1,7 +1,6 @@
 package ru.vik.spindel.feature.rawdata
 
 import ru.vik.spindel.core.designsystem.UiText
-import ru.vik.spindel.core.metrics.api.Metric
 
 data class RawDataState(
     val metrics: MetricsState = MetricsState(),
@@ -13,7 +12,7 @@ data class MetricsState(
     /** Флаг загрузки списка метрик. **/
     val isLoading: Boolean = false,
     /** Список метрик. **/
-    val list: List<Metric> = emptyList(),
+    val list: List<MetricUi> = emptyList(),
     /** Список идентификаторов выделенных строк. **/
     val selected: Set<Long> = emptySet(),
 )

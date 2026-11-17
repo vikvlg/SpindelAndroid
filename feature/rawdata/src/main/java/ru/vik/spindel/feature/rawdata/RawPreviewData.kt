@@ -14,5 +14,5 @@ internal object RawPreviewData {
         Metric(++metricId, LocalDateTime.of(2026, 9, 1, 18, 0, 0), 15.8, 22.0),
         Metric(++metricId, LocalDateTime.of(2026, 9, 1, 18, 57, 0), 15.6, 22.5),
         Metric(++metricId, LocalDateTime.of(2026, 9, 1, 20, 1, 0), 15.3, 21.7),
-    )
+    ).map { it.toMetricUi() }
 }

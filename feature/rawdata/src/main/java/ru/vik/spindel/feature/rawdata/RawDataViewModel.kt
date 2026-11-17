@@ -98,9 +98,11 @@ class RawDataViewModel @Inject constructor(
                     }
                 }
                 .collect { list ->
+                    val metricsUi = list.map { it.toMetricUi() }
+
                     _uiState.update { value ->
                         value.copy(
-                            metrics = value.metrics.copy(list = list, isLoading = false)
+                            metrics = value.metrics.copy(list = metricsUi, isLoading = false)
                         )
                     }
                 }
