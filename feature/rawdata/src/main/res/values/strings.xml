@@ -14,6 +14,8 @@
     <string name="rawdata_brew_section_search_results">Результаты поиска</string>
     <string name="rawdata_brew_not_selected">Варка не выбрана</string>
 
+    <string name="rawdata_table_empty">Нет данных</string>
+    <string name="rawdata_table_loading">Загрузка данных</string>
     <string name="rawdata_column_id">№</string>
     <string name="rawdata_column_date">Дата</string>
     <string name="rawdata_column_gravity">Плотность</string>

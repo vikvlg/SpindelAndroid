@@ -41,6 +41,7 @@ import ru.vik.spindel.core.designsystem.ScreenPreviews
 import ru.vik.spindel.core.designsystem.component.ScrollToTopButton
 import ru.vik.spindel.core.designsystem.component.datatable.DataTable
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
+import ru.vik.spindel.core.designsystem.component.datatable.DataTableDefaults
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableState
 import ru.vik.spindel.core.designsystem.component.datatable.rememberDataTableState
 
@@ -88,7 +89,7 @@ fun RawDataScreen(
                 DataTable(
                     items = state.metrics.list,
                     key = { metric -> metric.id },
-                    isLoading = state.metrics.isLoading,
+                    placeHolder = { DataTableDefaults.PlaceHolder(if (state.metrics.isLoading) R.string.rawdata_table_loading else R.string.rawdata_table_empty)  },
                     selectedKeys = state.metrics.selected,
                     onRowClick = { metric -> onIntent(RawDataIntent.ChangeRowSelected(metric.id)) },
                     columns = columns,

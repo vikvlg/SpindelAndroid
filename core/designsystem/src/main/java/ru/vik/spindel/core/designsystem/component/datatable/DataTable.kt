@@ -1,6 +1,5 @@
 package ru.vik.spindel.core.designsystem.component.datatable
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
@@ -36,9 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import ru.vik.spindel.core.designsystem.R
 import ru.vik.spindel.core.designsystem.component.datatable.internal.DataTableSpec
 import ru.vik.spindel.core.designsystem.component.datatable.internal.ResolvedColumn
 import kotlin.math.max
@@ -47,15 +44,13 @@ import kotlin.math.max
 fun <T> DataTable(
     items: List<T>,
     key: (T) -> Any,
-    isLoading: Boolean,
     selectedKeys: Set<Any> = emptySet(),
     columns: List<DataTableColumn<T>>,
     fixedColumnCount: Int = 1,
     fixedRowHeader: Boolean = true,
     onRowClick: GestureCallback<T> = null,
     onRowLongClick: GestureCallback<T> = null,
-    @StringRes placeHolderText: Int = R.string.designsystem_datatable_empty_list,
-    @StringRes loadingText: Int = R.string.designsystem_datatable_loading_list,
+    placeHolder: @Composable () -> Unit = DataTableDefaults::PlaceHolder,
     tableState: DataTableState = rememberDataTableState(),
     colors: DataTableColors = DataTableDefaults.colors(),
     headerHeight: Dp = DataTableDefaults.HeaderHeight,
@@ -99,7 +94,7 @@ fun <T> DataTable(
         fixedRowHeader = fixedRowHeader,
         onRowClick = onRowClick,
         onRowLongClick = onRowLongClick,
-        placeHolderText = if (isLoading) loadingText else placeHolderText,
+        placeHolder = placeHolder,
         //pinnedWidth = pinnedWidth,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
@@ -157,14 +152,7 @@ fun <T> DataTable(
 /** Заполнитель таблицы, когда нет данных. **/
 @Composable
 private fun <T> DataTableSpec<T>.PlaceHolder() {
-    Text(
-        modifier = Modifier
-            .fillMaxSize()
-            .wrapContentHeight(Alignment.CenterVertically),
-        text = stringResource(placeHolderText),
-        textAlign = TextAlign.Center,
-        color = colors.secondaryContent
-    )
+    placeHolder()
 }
 
 /** Фиксированный заголовок таблицы. **/
