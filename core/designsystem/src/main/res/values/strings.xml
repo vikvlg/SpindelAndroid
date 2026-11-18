@@ -2,5 +2,4 @@
 <resources>
     <string name="designsystem_scroll_to_top">Наверх</string>
     <string name="designsystem_datatable_empty_list">Пустой список</string>
-    <string name="designsystem_datatable_loading_list">Загрузка списка</string>
 </resources>
