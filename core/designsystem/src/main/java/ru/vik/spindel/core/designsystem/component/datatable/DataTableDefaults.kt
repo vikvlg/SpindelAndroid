@@ -1,12 +1,20 @@
 package ru.vik.spindel.core.designsystem.component.datatable
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ru.vik.spindel.core.designsystem.R
 
 enum class DataTableGridLines(
     internal val horizontal: Boolean,
@@ -74,4 +82,16 @@ object DataTableDefaults {
         endShadow = endShadow,
         scrollbarThumb = scrollbarThumb
     )
+
+    @Composable
+    fun PlaceHolder(@StringRes strId: Int = R.string.designsystem_datatable_empty_list) {
+        Text(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentHeight(Alignment.CenterVertically),
+            text = stringResource(strId),
+            textAlign = TextAlign.Center,
+            //color = colors.secondaryContent
+        )
+    }
 }
