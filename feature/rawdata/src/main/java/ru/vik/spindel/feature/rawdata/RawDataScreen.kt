@@ -1,5 +1,6 @@
 package ru.vik.spindel.feature.rawdata
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
@@ -41,7 +43,6 @@ import ru.vik.spindel.core.designsystem.ScreenPreviews
 import ru.vik.spindel.core.designsystem.component.ScrollToTopButton
 import ru.vik.spindel.core.designsystem.component.datatable.DataTable
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableColumn
-import ru.vik.spindel.core.designsystem.component.datatable.DataTableDefaults
 import ru.vik.spindel.core.designsystem.component.datatable.DataTableState
 import ru.vik.spindel.core.designsystem.component.datatable.rememberDataTableState
 
@@ -89,7 +90,7 @@ fun RawDataScreen(
                 DataTable(
                     items = state.metrics.list,
                     key = { metric -> metric.id },
-                    placeHolder = { DataTableDefaults.PlaceHolder(if (state.metrics.isLoading) R.string.rawdata_table_loading else R.string.rawdata_table_empty)  },
+                    placeHolder = { TablePlaceHolder(state = state, onClick = { showBrewPicker = true }) },
                     selectedKeys = state.metrics.selected,
                     onRowClick = { metric -> onIntent(RawDataIntent.ChangeRowSelected(metric.id)) },
                     columns = columns,
@@ -112,6 +113,48 @@ fun RawDataScreen(
             unassignedCount = state.brewPicker.unassignedCount,
             onSelect = { onIntent(RawDataIntent.SelectBrew(it)) },
             onDismiss = { showBrewPicker = false },
+        )
+    }
+}
+
+/**
+ * Плейс-холдер таблицы.
+ * В зависимости от UI-состояния меняет содержимое:
+ *  - действие "загрузить данные";
+ *  - плашка "загрузка данных";
+ *  - плашка "нет данных".
+ */
+@Composable
+private fun TablePlaceHolder(state: RawDataState, onClick: () -> Unit) {
+    val isNotSelected = (state.brewPicker.selection is BrewSelection.NotSelected)
+    val strId = if (isNotSelected) {
+        R.string.rawdata_table_initial
+    } else if (state.metrics.isLoading) R.string.rawdata_table_loading else R.string.rawdata_table_empty
+    val onClick: (() -> Unit)? = if (isNotSelected) onClick else null
+    TablePlaceHolder(strId = strId, onClick = onClick)
+}
+
+/** Плейс-холдер таблицы. **/
+@Composable
+private fun TablePlaceHolder(@StringRes strId: Int, onClick: (() -> Unit)? = null) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .then(
+                if (onClick == null) Modifier
+                else
+                    Modifier.clickable(
+                        onClickLabel = stringResource(R.string.rawdata_selector_action),
+                        onClick = onClick
+                    )
+            ),
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentHeight(Alignment.CenterVertically),
+            text = stringResource(strId),
+            textAlign = TextAlign.Center,
         )
     }
 }
