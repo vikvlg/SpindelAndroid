@@ -16,7 +16,7 @@ interface CoreDatabaseConfig {
 }
 
 @Database(
-    version = 1,
+    version = CoreDatabase.DB_VERSION,
     entities = [
         BrewDto::class,
         DeviceDto::class,
@@ -25,6 +25,10 @@ interface CoreDatabaseConfig {
 )
 @TypeConverters(Converters::class)
 internal abstract class CoreDatabase : RoomDatabase() {
+    companion object {
+        const val DB_VERSION = 1
+    }
+
     abstract fun getBrewDao(): BrewDao
     abstract fun getDeviceDao(): DeviceDao
     abstract fun getMetricDao(): MetricDao
