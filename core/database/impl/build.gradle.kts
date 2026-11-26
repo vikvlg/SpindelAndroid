@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
+    alias(libs.plugins.androidx.room)
 }
 
 android {
@@ -20,6 +21,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
