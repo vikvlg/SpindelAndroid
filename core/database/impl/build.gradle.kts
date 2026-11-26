@@ -28,9 +28,6 @@ dependencies {
     implementation(project(":core:devices:api"))
     implementation(project(":core:metrics:api"))
 
-    implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.material)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
     implementation(libs.room.runtime)

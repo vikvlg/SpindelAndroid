@@ -9,7 +9,7 @@ import java.time.LocalDateTime
 
 @Entity(
     tableName = "metrics",
-    foreignKeys = [ForeignKey(entity = BrewDto::class, parentColumns = ["id"], childColumns = ["brew_id"])],
+    foreignKeys = [ForeignKey(entity = BrewDto::class, parentColumns = ["id"], childColumns = ["brew_id"], onDelete = ForeignKey.CASCADE)],
     indices = [Index(value = ["brew_id"])]
 )
 data class MetricDto(

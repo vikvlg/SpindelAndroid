@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "devices",
-    foreignKeys = [ForeignKey(BrewDto::class, ["id"], ["brew_id"])],
+    foreignKeys = [ForeignKey(BrewDto::class, ["id"], ["brew_id"], onDelete = ForeignKey.SET_NULL)],
     indices = [Index(value = ["brew_id"])]
 )
 data class DeviceDto(
