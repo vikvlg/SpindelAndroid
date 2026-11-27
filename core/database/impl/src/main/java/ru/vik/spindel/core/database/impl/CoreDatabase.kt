@@ -16,17 +16,18 @@ interface CoreDatabaseConfig {
 }
 
 @Database(
-    version = CoreDatabase.DB_VERSION,
+    version = CoreDatabase.DATABASE_VERSION,
     entities = [
         BrewDto::class,
         DeviceDto::class,
         MetricDto::class,
-    ]
+    ],
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 internal abstract class CoreDatabase : RoomDatabase() {
     companion object {
-        const val DB_VERSION = 1
+        const val DATABASE_VERSION = 2
     }
 
     abstract fun getBrewDao(): BrewDao
@@ -46,5 +47,7 @@ internal fun createCoreDatabase(
         if (config.isDebug) {
             fallbackToDestructiveMigration(dropAllTables = true)
         }
-    }.build()
+    }
+    .addMigrations(*ALL_MIGRATIONS)
+    .build()
 }
