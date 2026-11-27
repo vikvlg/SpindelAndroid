@@ -78,6 +78,7 @@ class RawDataViewModel @Inject constructor(
                             brewPicker = value.brewPicker.copy(selectedBrew = brew)
                         )
                     }
+                    metricsRepository.refreshMetrics(brew?.id)
                 }
                 .collect { list ->
                     val metricsUi = list.map { it.toMetricUi() }
