@@ -17,7 +17,7 @@ data class MetricDto(
     val id: Long,
     val date: LocalDateTime,
     @ColumnInfo(name = "brew_id")
-    val brewId: Long,
+    val brewId: Long?,
     val gravity: Double,
     val temperature: Double,
 )
