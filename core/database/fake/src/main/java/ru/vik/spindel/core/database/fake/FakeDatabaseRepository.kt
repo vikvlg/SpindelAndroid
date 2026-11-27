@@ -15,6 +15,8 @@ import ru.vik.spindel.core.database.api.DatabaseRepository
 import ru.vik.spindel.core.devices.api.Device
 import ru.vik.spindel.core.metrics.api.BrewMetricCount
 import ru.vik.spindel.core.metrics.api.Metric
+import ru.vik.spindel.core.metrics.testdata.generateFermentationMetrics
+import ru.vik.spindel.core.metrics.testdata.generateTrashMetrics
 import java.time.LocalDateTime
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
@@ -142,48 +144,13 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
     private fun addNewMetrics(brewId: Long?, startTime: LocalDateTime? = null): MutableStateFlow<List<Metric>> {
         val startBrewTime = startTime ?: LocalDateTime.now()
         val list = if (brewId == null) {
-            generateTrashMetrics(startBrewTime)
+            generateTrashMetrics(startBrewTime, Random(-1))
         } else {
-            generateMetrics(startBrewTime)
+            generateFermentationMetrics(startBrewTime, Random(brewId))
         }
         val state = MutableStateFlow(list)
         metricsState[brewId] = state
         return state
-    }
-
-    private fun generateTrashMetrics(startTime: LocalDateTime = LocalDateTime.now()): List<Metric> {
-        val count = Random.nextInt(3, 10)
-        var time = startTime.minusDays(7)
-        return buildList {
-            for (i in 0..<count) {
-                add(
-                    Metric(
-                        id = i + 1L,
-                        date = time,
-                        gravity = Random.nextDouble(5.0, 25.0),
-                        temperature = Random.nextDouble(10.0, 45.0),
-                    )
-                )
-                time = time.plusMinutes(Random.nextLong(55, 65))
-            }
-        }
-    }
-
-    private fun generateMetrics(startTime: LocalDateTime = LocalDateTime.now()): List<Metric> {
-        // Параметры брожения
-        val startGravity = Random.nextDouble(10.0, 16.0)
-        val attenuation = Random.nextDouble(70.0, 90.0)
-        val duration = Random.nextInt(10, 21)
-        val startTemperature = Random.nextDouble(22.0, 30.0)
-        val targetTemperature = Random.nextDouble(10.0, 18.0)
-
-        return generateFermentationMetrics(
-            startTime,
-            startGravity,
-            attenuation,
-            duration,
-            startTemperature,
-            targetTemperature)
     }
 
     /** Имитация внутренних задержек при работе с локальной БД. **/

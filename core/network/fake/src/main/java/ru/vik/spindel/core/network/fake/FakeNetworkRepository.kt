@@ -5,6 +5,8 @@ import kotlinx.coroutines.delay
 import ru.vik.spindel.core.brews.api.Brew
 import ru.vik.spindel.core.devices.api.Device
 import ru.vik.spindel.core.metrics.api.Metric
+import ru.vik.spindel.core.metrics.testdata.generateFermentationMetrics
+import ru.vik.spindel.core.metrics.testdata.generateTrashMetrics
 import ru.vik.spindel.core.network.api.NetworkRepository
 import java.time.LocalDateTime
 import kotlin.random.Random
@@ -30,7 +32,7 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
     }
 
     override suspend fun getBrewList(): Result<List<Brew>> {
-        delay(1500.milliseconds) // Имитация задержки сети
+        simulateNetDelay()
 
         // Случайная ошибка
         if (Random.nextInt(10) == 0)
@@ -40,6 +42,12 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
         if (brewListRefreshCounter++ == 0L) {
             brewList.addAll(
                 listOf(
+                    Brew(++brewKey, "Рождественский грог", LocalDateTime.of(2026, 1, 7, 12, 0, 0), false),
+                    Brew(++brewKey, "Стаут", LocalDateTime.of(2026, 1, 28, 12, 0, 0), false),
+                    Brew(++brewKey, "Milkshake", LocalDateTime.of(2026, 2, 14, 12, 0, 0), false),
+                    Brew(++brewKey, "Первомайская варка", LocalDateTime.of(2026, 5, 1, 12, 0, 0), false),
+                    Brew(++brewKey, "Майская варка", LocalDateTime.of(2026, 5, 20, 12, 0, 0), false),
+                    Brew(++brewKey, "Быстролагер", LocalDateTime.of(2026, 6, 3, 12, 0, 0), false),
                     Brew(++brewKey, "Светлый эль", LocalDateTime.of(2026, 7, 1, 14, 0, 0), true),
                     Brew(++brewKey, "IPA осенний", LocalDateTime.of(2026, 9, 18, 14, 0, 0), true),
                     Brew(++brewKey, "Тыквенный эль", LocalDateTime.of(2026, 10, 1, 14, 0, 0), true),
@@ -50,8 +58,21 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
     }
 
     override suspend fun getMetricList(brewId: Long?): Result<List<Metric>> {
-        delay(1500.milliseconds) // Имитация задержки сети
-        return Result.success(emptyList())
+        simulateNetDelay()
+        val brew = brewList.find { brew -> brew.id == brewId }
+        val startBrewTime = brew?.date ?: LocalDateTime.now()
+        val list = if (brewId == null) {
+            generateTrashMetrics(startBrewTime, Random(-1))
+        } else {
+            generateFermentationMetrics(startBrewTime, Random(brewId))
+        }
+
+        val baseIndex = if (brewId == null) 0 else (brewId + 1) * 1_000_000
+        list.mapIndexed { index, metric ->
+            metric.copy(id = baseIndex + index)
+        }
+
+        return Result.success(list)
     }
 
     override fun getDevice(deviceId: Long): Result<Device> {
@@ -65,4 +86,7 @@ class FakeNetworkRepository @Inject constructor() : NetworkRepository {
     override fun getDeviceList(): Result<List<Device>> {
         return Result.success(deviceList)
     }
+
+    /** Имитация внутренних задержек при работе с сетью. **/
+    private suspend fun simulateNetDelay() = delay(1500.milliseconds)
 }

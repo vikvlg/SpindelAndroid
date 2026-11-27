@@ -21,9 +21,21 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         db.execSQL("CREATE INDEX IF NOT EXISTS `index_metrics_brew_id` ON `metrics` (`brew_id`)")
     }
 }
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        // metrics: поле brewId теперь nullable.
+        db.alterTable(
+            "metrics",
+            "CREATE TABLE IF NOT EXISTS `%s` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `brew_id` INTEGER, `gravity` REAL NOT NULL, `temperature` REAL NOT NULL, FOREIGN KEY(`brew_id`) REFERENCES `brews`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+            "`id`, `date`, `brew_id`, `gravity`, `temperature`"
+        )
+        db.execSQL("CREATE INDEX IF NOT EXISTS `index_metrics_brew_id` ON `metrics` (`brew_id`)")
+    }
+}
 
 val ALL_MIGRATIONS = arrayOf(
     MIGRATION_1_2,
+    MIGRATION_2_3,
 )
 
 /** Пересоздание таблицы с сохранением данных. **/

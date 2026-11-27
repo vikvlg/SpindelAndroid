@@ -27,7 +27,7 @@ interface CoreDatabaseConfig {
 @TypeConverters(Converters::class)
 internal abstract class CoreDatabase : RoomDatabase() {
     companion object {
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
     }
 
     abstract fun getBrewDao(): BrewDao
