@@ -1,4 +1,4 @@
-package ru.vik.spindel.core.database.fake
+package ru.vik.spindel.core.metrics.testdata
 
 import ru.vik.spindel.core.metrics.api.Metric
 import java.time.Duration
@@ -32,6 +32,26 @@ private const val TEMPERATURE_WOBBLE_STD = 0.2
 
 /** Насколько колебания в соседние часы похожи друг на друга; ближе к 1 — плавнее и медленнее. */
 private const val TEMPERATURE_WOBBLE_CORRELATION = 0.97
+
+fun generateFermentationMetrics(
+    startTime: LocalDateTime,
+    random: Random = Random.Default,
+): List<Metric> {
+    val originalGravity = random.nextDouble(10.0, 16.0)
+    val attenuationPercent = random.nextDouble(70.0, 90.0)
+    val durationDays = random.nextInt(10, 21)
+    val startTemperature = random.nextDouble(22.0, 30.0)
+    val targetTemperature = random.nextDouble(10.0, 18.0)
+
+    return generateFermentationMetrics(
+        startTime,
+        originalGravity,
+        attenuationPercent,
+        durationDays,
+        startTemperature,
+        targetTemperature,
+        random)
+}
 
 /**
  * Генерирует тестовые измерения плотности сусла (°P) и температуры (°C) во время брожения.
@@ -164,6 +184,27 @@ fun generateFermentationMetrics(
             temperature += (target - temperature) * (1 - exp(-stepHours / TEMPERATURE_RESPONSE_HOURS))
 
             time = time.plusSeconds(stepSeconds)
+        }
+    }
+}
+
+fun generateTrashMetrics(
+    startTime: LocalDateTime = LocalDateTime.now(),
+    random: Random = Random.Default,
+): List<Metric> {
+    val count = random.nextInt(3, 10)
+    var time = startTime.minusDays(7)
+    return buildList {
+        for (i in 0..<count) {
+            add(
+                Metric(
+                    id = i + 1L,
+                    date = time,
+                    gravity = random.nextDouble(5.0, 25.0),
+                    temperature = random.nextDouble(10.0, 45.0),
+                )
+            )
+            time = time.plusMinutes(random.nextLong(55, 65))
         }
     }
 }
