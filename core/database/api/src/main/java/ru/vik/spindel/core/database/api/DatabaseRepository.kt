@@ -17,6 +17,6 @@ interface DatabaseRepository {
     suspend fun addDevices(list: List<Device>)
 
     fun observeMetrics(brewId: Long?): Flow<List<Metric>>
-    suspend fun addMetrics(brewId: Long, list: List<Metric>)
+    suspend fun addMetrics(brewId: Long?, list: List<Metric>)
     fun observeCountsByBrew(): Flow<List<BrewMetricCount>>
 }

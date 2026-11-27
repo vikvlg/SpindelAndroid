@@ -8,7 +8,9 @@ plugins {
 android {
     namespace = "ru.vik.spindel"
     compileSdk {
-        version = release(37)
+        version = release(37) {
+            minorApiLevel = 2
+        }
     }
 
     defaultConfig {
@@ -18,6 +20,7 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildConfigField("String", "DB_NAME", "\"brews.db\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,13 +38,15 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
 dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:database:api"))
-    implementation(project(":core:database:fake"))
+    implementation(project(":core:database:impl"))
+    //implementation(project(":core:database:fake"))
     implementation(project(":core:network:api"))
     implementation(project(":core:network:fake"))
 
