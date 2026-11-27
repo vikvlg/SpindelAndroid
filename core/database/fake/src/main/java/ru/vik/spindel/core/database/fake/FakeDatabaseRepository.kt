@@ -121,7 +121,7 @@ class FakeDatabaseRepository @Inject constructor() : DatabaseRepository {
             }
     }
 
-    override suspend fun addMetrics(brewId: Long, list: List<Metric>) {
+    override suspend fun addMetrics(brewId: Long?, list: List<Metric>) {
         // TODO: .
     }
 

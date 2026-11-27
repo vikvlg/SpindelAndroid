@@ -14,7 +14,7 @@ class MetricsRepositoryImpl @Inject constructor(
 ) : MetricsRepository {
     override fun observeMetrics(brewId: Long?): Flow<List<Metric>> = database.observeMetrics(brewId)
 
-    override suspend fun refreshMetrics(brewId: Long): Result<Unit> {
+    override suspend fun refreshMetrics(brewId: Long?): Result<Unit> {
         return network.getMetricList(brewId).mapCatching { list ->
             database.addMetrics(brewId, list)
         }

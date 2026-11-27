@@ -15,7 +15,7 @@ internal fun MetricDto.toMetricDomain(): Metric {
 
 internal fun List<MetricDto>.toMetricDomain(): List<Metric> = map(MetricDto::toMetricDomain)
 
-internal fun Metric.toMetricDto(brewId: Long): MetricDto {
+internal fun Metric.toMetricDto(brewId: Long?): MetricDto {
     return MetricDto(id, date, brewId, gravity, temperature)
 }
 

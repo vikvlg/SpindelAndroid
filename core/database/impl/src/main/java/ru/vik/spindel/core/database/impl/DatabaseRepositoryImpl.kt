@@ -49,7 +49,7 @@ class DatabaseRepositoryImpl @Inject internal constructor(
     }
 
     override suspend fun addMetrics(
-        brewId: Long,
+        brewId: Long?,
         list: List<Metric>
     ) {
         val dtoList = list.map { it.toMetricDto(brewId) }
